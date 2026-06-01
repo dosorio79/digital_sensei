@@ -1,0 +1,35 @@
+# Changelog
+
+All notable changes to Digital Sensei are documented here.
+
+## [v0.1.0] - 2026-06-01
+
+### Added
+
+- Initial FastAPI backend with curated content validation and SQLite progress tracking.
+- React + Vite frontend for child-friendly Portuguese quiz practice.
+- Manual-backed content for vocabulary, Japanese numbers, Nage Waza, Ne Waza, Ren Raku Waza, Kaeshi Waza, and viradas.
+- Dedicated `Números` mode with number + kanji prompts and Japanese-name answers.
+- `Técnicas do Judo` mode grounded in manual technique families:
+  - Técnica de perna
+  - Técnica de braço
+  - Técnica de quadril
+  - Técnica de imobilização
+  - Sequência de golpes
+  - Contra-ataque
+  - Virada no chão
+- Original visual cue cards for techniques, shown after answering.
+- Official reference links for IJF, Kodokan, British Judo, USJF, and France Judo.
+- Yellow-orange belt visual theme and subtle manual-cover background.
+- Dockerfile and deployment notes.
+- Backend tests for content grounding, API behavior, numbers, terminology, and practice-option quality.
+
+### Changed
+
+- `Obi` now displays `Faixa / cinto` and accepts both terms.
+- Mixed practice asks technique-family questions for techniques instead of broad or unrelated vocabulary prompts.
+
+### Safety
+
+- No camera, microphone, chat, accounts, or social features.
+- External federation media is linked as reference only and not copied into the app.

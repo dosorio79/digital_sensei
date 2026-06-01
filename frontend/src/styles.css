@@ -1,0 +1,618 @@
+:root {
+  --ink: #17201d;
+  --dojo-green: #24352e;
+  --paper: #fffdf7;
+  --mat: #f4f6f1;
+  --belt-yellow: #ffd735;
+  --belt-orange: #f26a21;
+  --belt-gold: #ffb21e;
+  --soft-line: #d2dac8;
+  color: #17201d;
+  background: #f4f6f1;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 0% 100%, rgba(255, 215, 53, 0.22), transparent 30%),
+    linear-gradient(120deg, rgba(255, 215, 53, 0.16), transparent 34%),
+    linear-gradient(210deg, rgba(242, 106, 33, 0.13), transparent 38%),
+    var(--mat);
+  padding: 18px;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  left: -44px;
+  bottom: -34px;
+  z-index: 0;
+  width: clamp(230px, 25vw, 390px);
+  height: min(72vh, 560px);
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(244, 246, 241, 0), rgba(244, 246, 241, 0.82) 88%),
+    url("/manual-cover.jpg") left bottom / contain no-repeat;
+  opacity: 0.2;
+}
+
+.app-shell::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: 10px;
+  height: 100vh;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--belt-yellow), var(--belt-orange));
+}
+
+.practice-panel {
+  position: relative;
+  z-index: 1;
+  width: min(1040px, 100%);
+  min-height: calc(100vh - 36px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 18px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: #8a3a04;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(1.75rem, 5vw, 3.2rem);
+  line-height: 1;
+}
+
+.manual-pill {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid var(--dojo-green);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff9d8, #fff5ea);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mode-tabs button {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 2px solid var(--soft-line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #26322d;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.mode-tabs button.active {
+  border-color: var(--dojo-green);
+  background: linear-gradient(135deg, var(--belt-yellow), var(--belt-gold) 56%, var(--belt-orange));
+}
+
+.notice {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ffe2d6;
+  color: #75280f;
+  font-weight: 700;
+}
+
+.quiz-card,
+.progress-view,
+.done-state,
+.center-state {
+  align-self: stretch;
+  border: 2px solid #24352e;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 253, 247, 0.96)),
+    var(--paper);
+  box-shadow: 0 12px 0 var(--dojo-green), 0 22px 42px rgba(36, 53, 46, 0.08);
+}
+
+.quiz-card {
+  padding: clamp(18px, 5vw, 42px);
+}
+
+.quiz-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-weight: 900;
+}
+
+.tag {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.tag.vocabulario {
+  background: #dceee3;
+  color: #17442d;
+}
+
+.tag.numeros {
+  background: #fff3b8;
+  color: #5c3b00;
+}
+
+.tag.nage_waza {
+  background: #ffe69a;
+  color: #5c3b00;
+}
+
+.tag.ne_waza {
+  background: #d9ebff;
+  color: #113d66;
+}
+
+.tag.sequencias {
+  background: #ffe0d4;
+  color: #6d2a12;
+}
+
+.tag.viradas {
+  background: #ffe0c7;
+  color: #6d2a12;
+}
+
+.tag.neutral {
+  background: #eef1e9;
+  color: #24352e;
+}
+
+.progress-track {
+  height: 12px;
+  overflow: hidden;
+  border: 2px solid var(--dojo-green);
+  border-radius: 999px;
+  background: #e7ecdf;
+}
+
+.progress-track div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--belt-yellow), var(--belt-orange));
+  transition: width 200ms ease;
+}
+
+.quiz-card h2 {
+  margin: 28px 0 16px;
+  font-size: clamp(1.45rem, 4vw, 2.5rem);
+  line-height: 1.12;
+}
+
+.visual-cue {
+  min-height: 150px;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 2px solid var(--soft-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.cue-figure {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, transparent 72%, rgba(36, 53, 46, 0.12) 72%),
+    #f8faf5;
+}
+
+.judoca,
+.motion-line,
+.mat-line {
+  position: absolute;
+  display: block;
+}
+
+.judoca {
+  width: 42px;
+  height: 62px;
+  border: 4px solid #24352e;
+  border-radius: 20px 20px 12px 12px;
+  background: #fffdf7;
+}
+
+.judoca::before {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: 6px;
+  width: 22px;
+  height: 22px;
+  border: 4px solid #24352e;
+  border-radius: 50%;
+  background: #fffdf7;
+}
+
+.judoca::after {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 22px;
+  width: 62px;
+  height: 4px;
+  border-radius: 999px;
+  background: #24352e;
+}
+
+.judoca-a {
+  left: 36px;
+  bottom: 20px;
+}
+
+.judoca-b {
+  right: 36px;
+  bottom: 20px;
+  transform: rotate(-24deg);
+}
+
+.motion-line {
+  width: 56px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--belt-orange);
+}
+
+.line-one {
+  left: 64px;
+  top: 38px;
+  transform: rotate(-16deg);
+}
+
+.line-two {
+  left: 74px;
+  top: 58px;
+  transform: rotate(14deg);
+}
+
+.mat-line {
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  height: 4px;
+  border-radius: 999px;
+  background: #24352e;
+}
+
+.visual-cue.ne_waza .judoca-a,
+.visual-cue.ne_waza .judoca-b,
+.visual-cue.viradas .judoca-a,
+.visual-cue.viradas .judoca-b {
+  height: 34px;
+  bottom: 22px;
+  transform: rotate(90deg);
+}
+
+.visual-cue.ne_waza .judoca-b {
+  right: 50px;
+  bottom: 42px;
+}
+
+.visual-cue.viradas .judoca-b {
+  right: 46px;
+  bottom: 42px;
+  transform: rotate(130deg);
+}
+
+.visual-cue.sequencias .judoca-b {
+  transform: rotate(-8deg);
+}
+
+.visual-cue.sequencias .line-one,
+.visual-cue.sequencias .line-two {
+  width: 76px;
+}
+
+.cue-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.cue-copy strong {
+  font-size: 1.2rem;
+}
+
+.cue-copy span {
+  color: #8a3a04;
+  font-weight: 900;
+}
+
+.cue-copy ul {
+  display: grid;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: #53635c;
+  font-weight: 800;
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.answer-button {
+  min-height: 86px;
+  padding: 18px;
+  border: 2px solid var(--dojo-green);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17201d;
+  cursor: pointer;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.answer-button:disabled {
+  cursor: default;
+  opacity: 0.84;
+}
+
+.answer-button.correct {
+  background: #c9f0c9;
+}
+
+.answer-button.wrong {
+  background: #ffd3bd;
+}
+
+.feedback {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.feedback .visual-cue {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.feedback.good {
+  background: linear-gradient(135deg, #e4f7e7, #fff9d8);
+}
+
+.feedback.retry {
+  background: linear-gradient(135deg, #fff3d0, #ffe3cf);
+}
+
+.feedback strong {
+  font-size: 1.3rem;
+}
+
+.feedback span {
+  display: grid;
+  gap: 6px;
+}
+
+.feedback a {
+  color: #163f76;
+  font-weight: 900;
+}
+
+.feedback button,
+.primary-action {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid #24352e;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--dojo-green), #17201d);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.done-state,
+.center-state {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 28px;
+  text-align: center;
+}
+
+.done-state h2 {
+  margin-bottom: 0;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.done-state p {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.progress-view {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 5vw, 34px);
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  min-height: 112px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border: 2px solid var(--soft-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.metric strong {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.metric span {
+  font-weight: 800;
+}
+
+.review-list {
+  display: grid;
+  gap: 12px;
+}
+
+.review-list h2 {
+  margin-bottom: 0;
+}
+
+.review-list article {
+  padding: 14px;
+  border: 2px solid var(--soft-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.review-list h3 {
+  margin: 10px 0 4px;
+  font-size: 1.25rem;
+}
+
+.review-list p,
+.quiet {
+  margin-bottom: 0;
+  color: #53635c;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 10px;
+  }
+
+  .app-shell::before {
+    width: 210px;
+    height: 300px;
+    opacity: 0.1;
+  }
+
+  .practice-panel {
+    min-height: calc(100vh - 20px);
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .manual-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mode-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mode-tabs button {
+    min-height: 58px;
+  }
+
+  .answers,
+  .score-grid,
+  .visual-cue {
+    grid-template-columns: 1fr;
+  }
+
+  .cue-figure {
+    height: 112px;
+  }
+
+  .feedback {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 980px) {
+  .mode-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
