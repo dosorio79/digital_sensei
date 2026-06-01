@@ -103,8 +103,8 @@ def _category_options(item: ContentItem) -> list[str]:
 
 def _category_prompt(item: ContentItem) -> str:
     if item.category == Category.viradas:
-        return "No manual, as viradas pertencem a que grupo de treino?"
-    return f"No manual, {item.japanese} pertence a que família técnica?"
+        return "As viradas pertencem a que grupo de treino?"
+    return f"{item.japanese} pertence a que família técnica?"
 
 
 def build_practice(mode: str = "treinar_agora", limit: int = 8) -> list[PracticeQuestion]:

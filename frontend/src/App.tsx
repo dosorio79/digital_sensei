@@ -297,15 +297,223 @@ function QuizView({
   );
 }
 
+// ── SVG illustration constants ────────────────────────────────────────────────
+const IC_D = "#24352e";   // dark
+const IC_O = "#d97706";   // orange
+const IC_F = "#fffdf7";   // light fill
+const IC_SW = 2.5;        // stroke width
+
+/** Standing judoka. cx = horizontal centre, fy = foot y (default 108). */
+function JudokaFigure({
+  cx, fy = 108, angle = 0, ax, ay,
+}: { cx: number; fy?: number; angle?: number; ax?: number; ay?: number }) {
+  const el = (
+    <>
+      <circle cx={cx} cy={fy - 63} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+      <line x1={cx} y1={fy - 54} x2={cx} y2={fy - 32} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+      <line x1={cx - 15} y1={fy - 43} x2={cx + 15} y2={fy - 43} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+      <line x1={cx} y1={fy - 32} x2={cx - 11} y2={fy} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+      <line x1={cx} y1={fy - 32} x2={cx + 11} y2={fy} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+    </>
+  );
+  return angle !== 0
+    ? <g transform={`rotate(${angle}, ${ax ?? cx}, ${ay ?? fy - 32})`}>{el}</g>
+    : <>{el}</>;
+}
+
+/** Renders a pose-specific SVG scene (viewBox 0 0 180 120). */
+function TechniqueIllustration({ pose, category }: { pose?: string; category: Category }) {
+  const p = pose ?? category;
+  return (
+    <svg viewBox="0 0 180 120" width="100%" height="100%" style={{ display: "block" }} aria-hidden="true">
+      {/* mat line */}
+      <line x1={12} y1={108} x2={168} y2={108} stroke={IC_D} strokeWidth={3} strokeLinecap="round" />
+      {p === "sweep_out" && (
+        <>
+          <JudokaFigure cx={52} />
+          {/* sweeping leg - outside */}
+          <line x1={52} y1={76} x2={96} y2={108} stroke={IC_O} strokeWidth={4} strokeLinecap="round" />
+          <JudokaFigure cx={125} angle={22} ax={125} ay={76} />
+        </>
+      )}
+      {p === "sweep_in" && (
+        <>
+          <JudokaFigure cx={55} />
+          {/* sweeping leg - inside (shorter, crossing inward) */}
+          <line x1={55} y1={76} x2={84} y2={92} stroke={IC_O} strokeWidth={4} strokeLinecap="round" />
+          <JudokaFigure cx={120} angle={18} ax={120} ay={76} />
+        </>
+      )}
+      {p === "foot_block" && (
+        <>
+          <JudokaFigure cx={50} />
+          {/* blocking foot extended forward to mat */}
+          <line x1={50} y1={76} x2={95} y2={108} stroke={IC_O} strokeWidth={4} strokeLinecap="round" />
+          {/* vertical stop indicator */}
+          <line x1={95} y1={82} x2={95} y2={108} stroke={IC_O} strokeWidth={2} strokeLinecap="round" strokeDasharray="4 3" />
+          {/* uke leaning forward */}
+          <JudokaFigure cx={126} angle={-22} ax={126} ay={76} />
+        </>
+      )}
+      {p === "shoulder_throw" && (
+        <>
+          {/* tori in entry: head low, bent, back to uke */}
+          <circle cx={72} cy={65} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={72} y1={74} x2={82} y2={86} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={66} y1={80} x2={56} y2={68} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={82} y1={79} x2={108} y2={70} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={82} y1={86} x2={73} y2={108} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={82} y1={86} x2={92} y2={108} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* uke going over shoulder */}
+          <JudokaFigure cx={128} fy={92} angle={-62} ax={108} ay={70} />
+          {/* rotation arc */}
+          <path d="M 108 70 Q 122 44 130 60" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <polygon points="130,60 122,56 125,65" fill={IC_O} />
+        </>
+      )}
+      {p === "hip_throw" && (
+        <>
+          <JudokaFigure cx={62} />
+          {/* hip contact indicator */}
+          <ellipse cx={78} cy={76} rx={9} ry={5} fill={IC_O} opacity={0.75} />
+          {/* uke going over hip */}
+          <JudokaFigure cx={122} fy={92} angle={-48} ax={78} ay={76} />
+          {/* rotation arc */}
+          <path d="M 78 66 Q 108 40 124 58" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <polygon points="124,58 115,56 118,65" fill={IC_O} />
+        </>
+      )}
+      {p === "kesa_gatame" && (
+        <>
+          {/* uke flat: head left */}
+          <circle cx={55} cy={92} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={64} y1={92} x2={158} y2={92} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={100} y1={82} x2={100} y2={102} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* tori sitting beside uke's head/shoulder */}
+          <circle cx={76} cy={52} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={76} y1={61} x2={76} y2={78} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={76} y1={68} x2={55} y2={90} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={76} y1={68} x2={96} y2={88} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={76} y1={78} x2={58} y2={104} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={76} y1={78} x2={94} y2={104} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* control point */}
+          <circle cx={55} cy={90} r={5} fill={IC_O} opacity={0.85} />
+        </>
+      )}
+      {p === "yoko_shiho" && (
+        <>
+          {/* uke flat: head left */}
+          <circle cx={28} cy={88} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={37} y1={88} x2={152} y2={88} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={80} y1={79} x2={80} y2={97} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* tori perpendicular (vertical, on uke's side) */}
+          <circle cx={90} cy={40} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={90} y1={49} x2={90} y2={70} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={59} x2={42} y2={83} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={59} x2={136} y2={83} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={70} x2={68} y2={90} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={70} x2={112} y2={90} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* control points both sides */}
+          <circle cx={42} cy={83} r={4} fill={IC_O} opacity={0.85} />
+          <circle cx={136} cy={83} r={4} fill={IC_O} opacity={0.85} />
+        </>
+      )}
+      {p === "kami_shiho" && (
+        <>
+          {/* uke flat: head right */}
+          <circle cx={148} cy={90} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={139} y1={90} x2={28} y2={90} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={81} x2={90} y2={99} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* tori above uke's head */}
+          <circle cx={148} cy={36} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={148} y1={45} x2={148} y2={66} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={148} y1={55} x2={140} y2={83} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={148} y1={55} x2={156} y2={83} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={148} y1={66} x2={132} y2={96} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={148} y1={66} x2={164} y2={96} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* control on uke's head */}
+          <circle cx={148} cy={83} r={5} fill={IC_O} opacity={0.85} />
+        </>
+      )}
+      {p === "tate_shiho" && (
+        <>
+          {/* uke flat: head left */}
+          <circle cx={30} cy={92} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={39} y1={92} x2={152} y2={92} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={92} y1={83} x2={92} y2={101} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* tori mounted: head up, knees wide to mat */}
+          <circle cx={90} cy={35} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={90} y1={44} x2={90} y2={65} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={75} y1={53} x2={105} y2={53} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={65} x2={58} y2={92} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={90} y1={65} x2={122} y2={92} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* knee contact dots */}
+          <circle cx={58} cy={92} r={5} fill={IC_O} opacity={0.85} />
+          <circle cx={122} cy={92} r={5} fill={IC_O} opacity={0.85} />
+        </>
+      )}
+      {p === "turnover" && (
+        <>
+          {/* uke prone: head left */}
+          <circle cx={40} cy={90} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={49} y1={90} x2={148} y2={90} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={88} y1={82} x2={88} y2={98} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          {/* X = face-down indicator */}
+          <line x1={130} y1={83} x2={142} y2={97} stroke={IC_O} strokeWidth={2} strokeLinecap="round" />
+          <line x1={142} y1={83} x2={130} y2={97} stroke={IC_O} strokeWidth={2} strokeLinecap="round" />
+          {/* tori kneeling beside */}
+          <JudokaFigure cx={155} />
+          {/* rotation arrow */}
+          <path d="M 100 80 Q 92 62 80 74" stroke={IC_O} strokeWidth={3} fill="none" strokeLinecap="round" />
+          <polygon points="80,74 86,65 88,75" fill={IC_O} />
+        </>
+      )}
+      {p === "chain" && (
+        <>
+          <JudokaFigure cx={32} />
+          <line x1={54} y1={75} x2={74} y2={75} stroke={IC_O} strokeWidth={3} strokeLinecap="round" />
+          <polygon points="74,75 66,70 66,80" fill={IC_O} />
+          <JudokaFigure cx={96} />
+          <line x1={118} y1={75} x2={138} y2={75} stroke={IC_O} strokeWidth={3} strokeLinecap="round" />
+          <polygon points="138,75 130,70 130,80" fill={IC_O} />
+          {/* ghost third figure */}
+          <circle cx={160} cy={45} r={9} fill={IC_F} stroke="#9ab8b0" strokeWidth={IC_SW} />
+          <line x1={160} y1={54} x2={160} y2={76} stroke="#9ab8b0" strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={145} y1={64} x2={175} y2={64} stroke="#9ab8b0" strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={160} y1={76} x2={149} y2={108} stroke="#9ab8b0" strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={160} y1={76} x2={171} y2={108} stroke="#9ab8b0" strokeWidth={IC_SW} strokeLinecap="round" />
+        </>
+      )}
+      {p === "counter" && (
+        <>
+          <JudokaFigure cx={38} />
+          {/* attack arrow right */}
+          <line x1={60} y1={66} x2={88} y2={66} stroke={IC_D} strokeWidth={2.5} strokeLinecap="round" />
+          <polygon points="88,66 80,61 80,71" fill={IC_D} />
+          <JudokaFigure cx={140} />
+          {/* counter arc back left */}
+          <path d="M 88 78 Q 90 100 60 78" stroke={IC_O} strokeWidth={3} fill="none" strokeLinecap="round" />
+          <polygon points="60,78 68,73 67,83" fill={IC_O} />
+        </>
+      )}
+      {!["sweep_out","sweep_in","foot_block","shoulder_throw","hip_throw",
+         "kesa_gatame","yoko_shiho","kami_shiho","tate_shiho",
+         "turnover","chain","counter"].includes(p) && (
+        <>
+          <JudokaFigure cx={52} />
+          <JudokaFigure cx={128} />
+          <line x1={68} y1={64} x2={112} y2={64} stroke={IC_O} strokeWidth={2.5} strokeLinecap="round" strokeDasharray="6 3" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 function VisualCueCard({ cue, category }: { cue: VisualCue; category: Category }) {
   return (
     <aside className={`visual-cue ${category}`} aria-label={`Pista visual: ${cue.label}`}>
-      <div className="cue-figure" aria-hidden="true">
-        <span className="judoca judoca-a" />
-        <span className="motion-line line-one" />
-        <span className="motion-line line-two" />
-        <span className="judoca judoca-b" />
-        <span className="mat-line" />
+      <div className="cue-figure">
+        <TechniqueIllustration pose={cue.pose} category={category} />
       </div>
       <div className="cue-copy">
         <strong>{cue.label}</strong>

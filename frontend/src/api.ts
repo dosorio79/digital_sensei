@@ -55,6 +55,7 @@ export type VisualCue = {
   label: string;
   action: string;
   hints: string[];
+  pose?: string;
 };
 
 export type ContentCatalog = {

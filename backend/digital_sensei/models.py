@@ -32,6 +32,7 @@ class VisualCue(BaseModel):
     label: str = Field(min_length=1)
     action: str = Field(min_length=1)
     hints: list[str] = Field(min_length=1)
+    pose: str | None = None
 
 
 class ContentItem(BaseModel):
