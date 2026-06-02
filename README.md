@@ -44,10 +44,22 @@ Install backend dependencies:
 uv sync --extra dev
 ```
 
+Or install both backend and frontend dependencies:
+
+```bash
+make install
+```
+
 Run the API:
 
 ```bash
 uv run python main.py
+```
+
+or:
+
+```bash
+make api
 ```
 
 Run the frontend in another terminal:
@@ -56,6 +68,12 @@ Run the frontend in another terminal:
 cd frontend
 npm install
 npm run dev
+```
+
+or:
+
+```bash
+make frontend-dev
 ```
 
 Open `http://localhost:5173`.
@@ -69,6 +87,12 @@ cd ..
 uv run uvicorn backend.digital_sensei.app:app --host 127.0.0.1 --port 8001
 ```
 
+or:
+
+```bash
+make serve
+```
+
 Open `http://127.0.0.1:8001`.
 
 ## Tests
@@ -76,6 +100,12 @@ Open `http://127.0.0.1:8001`.
 ```bash
 uv run --extra dev pytest
 cd frontend && npm run build
+```
+
+or:
+
+```bash
+make test
 ```
 
 ## API
