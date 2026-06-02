@@ -60,6 +60,10 @@ def test_numbers_mode_asks_for_japanese_number_names() -> None:
 
     assert len(questions) == 10
     assert {question.category for question in questions} == {Category.numeros}
+    for question in questions:
+        item = next(item for item in load_catalog().items if item.id == question.item_id)
+        arabic = item.manual_text.split(" - ", 1)[0]
+        assert f"{arabic} / {item.japanese}" in question.prompt
     assert all(question.correct_answer in question.options for question in questions)
     assert {question.correct_answer for question in questions} == number_names
     assert all(set(question.options).issubset(number_names) for question in questions)

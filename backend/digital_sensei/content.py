@@ -87,6 +87,11 @@ def _technique_label(item: ContentItem) -> str:
     return TECHNIQUE_LABEL_BY_ANSWER.get(item.portuguese, item.portuguese)
 
 
+def _number_pair(item: ContentItem) -> str:
+    arabic = item.manual_text.split(" - ", 1)[0]
+    return f"{arabic} / {item.japanese}"
+
+
 def _category_options(item: ContentItem, rng: random.Random) -> list[str]:
     correct = _technique_label(item)
     if item.category == Category.nage_waza:
@@ -115,10 +120,12 @@ def _meaning_prompt(item: ContentItem, rng: random.Random) -> str:
             ]
         )
     elif item.category == Category.numeros:
+        number_pair = _number_pair(item)
         prompts.extend(
             [
-                f"Como se diz o símbolo {item.japanese} em japonês?",
-                f"Que nome japonês corresponde a {item.japanese}?",
+                f"Como se diz {number_pair} em japonês?",
+                f"Qual é o nome japonês de {number_pair}?",
+                f"{number_pair} diz-se como em japonês?",
             ]
         )
     return rng.choice(_unique(prompts))
