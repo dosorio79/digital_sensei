@@ -1,6 +1,6 @@
 # Digital Sensei
 
-![Release](https://img.shields.io/badge/release-v0.1.0-f26a21)
+![Release](https://img.shields.io/badge/release-v0.2.0-f26a21)
 ![Python](https://img.shields.io/badge/python-3.11-24352e)
 ![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-ffd735)
@@ -141,6 +141,6 @@ Then open `http://localhost:8000`.
 
 ## Release
 
-Current release: `v0.1.0`.
+Current release: `v0.2.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.

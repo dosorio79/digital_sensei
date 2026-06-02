@@ -4,6 +4,8 @@ All notable changes to Digital Sensei are documented here.
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-06-02
+
 ### Added
 
 - Adulto/Criança profile switcher for keeping separate local progress.
