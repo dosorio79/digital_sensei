@@ -599,11 +599,11 @@ function VisualCueCard({ cue, category }: { cue: VisualCue; category: Category }
   );
 }
 
-function demoRequirement(item: ContentItem): string {
-  if (item.id === "seq-ren-raku-waza") return "Demonstrar 2 sequências";
-  if (item.id === "seq-kaeshi-waza") return "Demonstrar 1 contra-ataque";
-  if (item.id === "viradas-decubito-ventral") return "Demonstrar 3 viradas";
-  return item.manual_text;
+function demoRequirement(item: ContentItem): { count: string; label: string } {
+  if (item.id === "seq-ren-raku-waza") return { count: "2", label: "sequências" };
+  if (item.id === "seq-kaeshi-waza") return { count: "1", label: "contra-ataque" };
+  if (item.id === "viradas-decubito-ventral") return { count: "3", label: "viradas" };
+  return { count: "Demo", label: item.manual_text };
 }
 
 function DemosView({ loading, catalog }: { loading: boolean; catalog: ContentCatalog | null }) {
@@ -618,22 +618,28 @@ function DemosView({ loading, catalog }: { loading: boolean; catalog: ContentCat
 
   return (
     <section className="demos-view">
-      {items.map((item) => (
-        <article key={item.id} className="demo-card">
-          <div className="demo-copy">
-            <span className={categoryClass(item.category)}>{CATEGORY_LABELS[item.category]}</span>
-            <h2>{item.japanese}</h2>
-            <strong>{demoRequirement(item)}</strong>
-            <p>{item.child_explanation}</p>
-            {item.media_sources.length ? (
-              <a href={item.media_sources[0].url} target="_blank" rel="noreferrer">
-                Ver referência
-              </a>
-            ) : null}
-          </div>
-          {item.visual_cue ? <VisualCueCard cue={item.visual_cue} category={item.category} /> : null}
-        </article>
-      ))}
+      {items.map((item) => {
+        const requirement = demoRequirement(item);
+        return (
+          <article key={item.id} className="demo-card">
+            <div className="demo-copy">
+              <span className={categoryClass(item.category)}>{CATEGORY_LABELS[item.category]}</span>
+              <h2>{item.japanese}</h2>
+              <span className="demo-badge">
+                <strong>{requirement.count}</strong>
+                {requirement.label}
+              </span>
+              <p>{item.child_explanation}</p>
+              {item.media_sources.length ? (
+                <a href={item.media_sources[0].url} target="_blank" rel="noreferrer">
+                  Ver referência
+                </a>
+              ) : null}
+            </div>
+            {item.visual_cue ? <VisualCueCard cue={item.visual_cue} category={item.category} /> : null}
+          </article>
+        );
+      })}
     </section>
   );
 }
