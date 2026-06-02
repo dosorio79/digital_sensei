@@ -111,7 +111,7 @@ def _meaning_prompt(item: ContentItem, rng: random.Random) -> str:
         prompts.extend(
             [
                 f"Qual é o significado de {item.japanese}?",
-                f"No guia, {item.japanese} quer dizer o quê?",
+                f"{item.japanese} quer dizer o quê?",
             ]
         )
     elif item.category == Category.numeros:
@@ -127,13 +127,13 @@ def _meaning_prompt(item: ContentItem, rng: random.Random) -> str:
 def _category_prompt(item: ContentItem, rng: random.Random) -> str:
     if item.category == Category.viradas:
         prompts = [
-            "Quando uke está de barriga para baixo, que grupo do guia é este?",
-            "Que grupo do guia trabalha com uke em decúbito ventral?",
+            "Quando uke está de barriga para baixo, que grupo é este?",
+            "Que grupo trabalha com uke em decúbito ventral?",
         ]
     else:
         prompts = [
             f"A que grupo pertence {item.japanese}?",
-            f"No guia, {item.japanese} fica em que grupo?",
+            f"{item.japanese} fica em que grupo?",
             f"Que grupo de treino combina com {item.japanese}?",
         ]
     return rng.choice(prompts)
