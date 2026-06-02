@@ -133,8 +133,8 @@ def _category_prompt(item: ContentItem, rng: random.Random) -> str:
     else:
         prompts = [
             f"A que grupo pertence {item.japanese}?",
-            f"{item.japanese} fica em que grupo?",
-            f"Que grupo de treino combina com {item.japanese}?",
+            f"{item.japanese} pertence a que grupo?",
+            f"Qual é o grupo de {item.japanese}?",
         ]
     return rng.choice(prompts)
 
