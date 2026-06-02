@@ -64,6 +64,8 @@ export type ContentCatalog = {
   items: ContentItem[];
 };
 
+export type UserId = "adulto" | "crianca";
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(path, {
     headers: { "Content-Type": "application/json" },
@@ -74,22 +76,28 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error(`Pedido falhou: ${response.status}`);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
 }
 
-export function fetchPractice(mode: string): Promise<PracticeQuestion[]> {
-  return request<PracticeQuestion[]>(`/api/practice/today?mode=${mode}`);
+export function fetchPractice(mode: string, userId: UserId): Promise<PracticeQuestion[]> {
+  const params = new URLSearchParams({ mode, user_id: userId });
+  return request<PracticeQuestion[]>(`/api/practice/today?${params}`);
 }
 
-export function fetchProgress(): Promise<ProgressSummary> {
-  return request<ProgressSummary>("/api/progress");
+export function fetchProgress(userId: UserId): Promise<ProgressSummary> {
+  const params = new URLSearchParams({ user_id: userId });
+  return request<ProgressSummary>(`/api/progress?${params}`);
 }
 
 export function fetchContent(): Promise<ContentCatalog> {
   return request<ContentCatalog>("/api/content");
 }
 
-export function recordAttempt(question: PracticeQuestion, selectedAnswer: string): Promise<unknown> {
+export function recordAttempt(question: PracticeQuestion, selectedAnswer: string, userId: UserId): Promise<unknown> {
   return request("/api/attempts", {
     method: "POST",
     body: JSON.stringify({
@@ -97,7 +105,12 @@ export function recordAttempt(question: PracticeQuestion, selectedAnswer: string
       item_id: question.item_id,
       selected_answer: selectedAnswer,
       correct: selectedAnswer === question.correct_answer,
-      mode: question.id.split("-")[0] || "treinar_agora"
+      mode: question.id.split("-")[0] || "treinar_agora",
+      user_id: userId
     })
   });
+}
+
+export function resetProgress(userId: UserId): Promise<void> {
+  return request(`/api/progress/${userId}`, { method: "DELETE" });
 }

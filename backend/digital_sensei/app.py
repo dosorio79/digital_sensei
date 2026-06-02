@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .content import build_practice, load_catalog
 from .models import AttemptIn, AttemptOut, ContentCatalog, PracticeQuestion, ProgressSummary
-from .progress import init_db, record_attempt, summarize_progress
+from .progress import init_db, record_attempt, reset_progress, summarize_progress
 
 ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIST = ROOT / "frontend" / "dist"
@@ -48,9 +48,10 @@ def content() -> ContentCatalog:
 def practice_today(
     mode: str = Query(default="treinar_agora", pattern="^(treinar_agora|palavras|numeros|tipos|review)$"),
     limit: int = Query(default=8, ge=1, le=20),
+    user_id: str = Query(default="adulto", pattern="^(adulto|crianca)$"),
 ) -> list[PracticeQuestion]:
     if mode == "review":
-        progress = summarize_progress()
+        progress = summarize_progress(user_id)
         weak_ids = [topic.item_id for topic in progress.weak_topics]
         questions = [question for question in build_practice("treinar_agora", 20) if question.item_id in weak_ids]
         return questions[:limit] or build_practice("treinar_agora", limit)
@@ -66,8 +67,15 @@ def attempts(attempt: AttemptIn) -> AttemptOut:
 
 
 @app.get("/api/progress", response_model=ProgressSummary)
-def progress() -> ProgressSummary:
-    return summarize_progress()
+def progress(user_id: str = Query(default="adulto", pattern="^(adulto|crianca)$")) -> ProgressSummary:
+    return summarize_progress(user_id)
+
+
+@app.delete("/api/progress/{user_id}", status_code=204)
+def reset(user_id: str) -> None:
+    if user_id not in {"adulto", "crianca"}:
+        raise HTTPException(status_code=404, detail="Unknown user")
+    reset_progress(user_id)
 
 
 if FRONTEND_DIST.exists():

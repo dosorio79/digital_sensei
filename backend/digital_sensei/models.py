@@ -75,12 +75,16 @@ class PracticeQuestion(BaseModel):
     visual_cue: VisualCue | None = None
 
 
+VALID_USERS = {"adulto", "crianca"}
+
+
 class AttemptIn(BaseModel):
     question_id: str = Field(min_length=1)
     item_id: str = Field(min_length=1)
     selected_answer: str = Field(min_length=1)
     correct: bool
     mode: str = Field(default="treinar_agora", min_length=1)
+    user_id: str = Field(default="adulto", pattern="^(adulto|crianca)$")
 
 
 class AttemptOut(BaseModel):
@@ -90,6 +94,7 @@ class AttemptOut(BaseModel):
     selected_answer: str
     correct: bool
     mode: str
+    user_id: str
     created_at: datetime
 
 

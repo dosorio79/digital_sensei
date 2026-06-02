@@ -1,25 +1,26 @@
 import {
   Award,
-  BookOpenText,
   CircleHelp,
   Dumbbell,
   Hash,
   Languages,
   RotateCcw,
   Sparkles,
-  Trophy
+  Trash2,
+  Trophy,
+  UserRound
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   type Category,
-  type ContentCatalog,
   type PracticeQuestion,
   type ProgressSummary,
+  type UserId,
   type VisualCue,
-  fetchContent,
   fetchPractice,
   fetchProgress,
-  recordAttempt
+  recordAttempt,
+  resetProgress
 } from "./api";
 
 type Mode = "treinar_agora" | "palavras" | "numeros" | "tipos" | "review" | "progresso";
@@ -53,23 +54,32 @@ function questionTag(question: PracticeQuestion, selected: string | null): { lab
   return { label: CATEGORY_LABELS[question.category], className: categoryClass(question.category) };
 }
 
+function storedUser(): UserId {
+  return localStorage.getItem("ds_user") === "crianca" ? "crianca" : "adulto";
+}
+
 export function App() {
+  const [userId, setUserId] = useState<UserId>(storedUser);
   const [mode, setMode] = useState<Mode>("treinar_agora");
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
-  const [catalog, setCatalog] = useState<ContentCatalog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   const currentQuestion = questions[questionIndex];
   const sessionDone = questions.length > 0 && questionIndex >= questions.length;
 
-  useEffect(() => {
-    fetchContent().then(setCatalog).catch(() => undefined);
-  }, []);
+  function switchUser(next: UserId) {
+    localStorage.setItem("ds_user", next);
+    setUserId(next);
+    setMode("treinar_agora");
+    setProgress(null);
+    setSelected(null);
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -78,7 +88,7 @@ export function App() {
 
     if (mode === "progresso") {
       setLoading(true);
-      fetchProgress()
+      fetchProgress(userId)
         .then((data) => {
           if (!ignore) setProgress(data);
         })
@@ -96,7 +106,7 @@ export function App() {
     setLoading(true);
     setQuestionIndex(0);
     setCorrectCount(0);
-    fetchPractice(mode)
+    fetchPractice(mode, userId)
       .then((data) => {
         if (!ignore) setQuestions(data);
       })
@@ -110,9 +120,8 @@ export function App() {
     return () => {
       ignore = true;
     };
-  }, [mode]);
+  }, [mode, userId]);
 
-  const manualCount = catalog?.items.length ?? 0;
   const progressPercent = useMemo(() => {
     if (!questions.length || sessionDone) return 100;
     return Math.round((questionIndex / questions.length) * 100);
@@ -125,7 +134,7 @@ export function App() {
       setCorrectCount((value) => value + 1);
     }
     try {
-      await recordAttempt(currentQuestion, answer);
+      await recordAttempt(currentQuestion, answer, userId);
     } catch {
       setError("Resposta guardada só neste ecrã. O progresso pode não ter sido atualizado.");
     }
@@ -136,6 +145,20 @@ export function App() {
     setQuestionIndex((value) => value + 1);
   }
 
+  async function handleReset() {
+    if (!confirm(`Apagar todo o progresso de ${userId === "adulto" ? "Adulto" : "Criança"}?`)) return;
+    setResetting(true);
+    try {
+      await resetProgress(userId);
+      setProgress(null);
+      setMode("treinar_agora");
+    } catch {
+      setError("Não consegui apagar o progresso.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <main className="app-shell">
       <section className="practice-panel" aria-label="Treino Digital Sensei">
@@ -144,9 +167,20 @@ export function App() {
             <p className="eyebrow">Digital Sensei</p>
             <h1>Graduação amarelo-laranja</h1>
           </div>
-          <div className="manual-pill">
-            <BookOpenText size={18} aria-hidden="true" />
-            <span>{manualCount || "--"} itens do manual</span>
+          <div className="user-switcher">
+            <UserRound size={16} aria-hidden="true" />
+            <button
+              className={userId === "adulto" ? "active" : ""}
+              onClick={() => switchUser("adulto")}
+            >
+              Adulto
+            </button>
+            <button
+              className={userId === "crianca" ? "active" : ""}
+              onClick={() => switchUser("crianca")}
+            >
+              Criança
+            </button>
           </div>
         </header>
 
@@ -170,7 +204,12 @@ export function App() {
         {error ? <p className="notice">{error}</p> : null}
 
         {mode === "progresso" ? (
-          <ProgressView loading={loading} progress={progress} />
+          <ProgressView
+            loading={loading}
+            progress={progress}
+            onReset={handleReset}
+            resetting={resetting}
+          />
         ) : (
           <QuizView
             loading={loading}
@@ -528,7 +567,14 @@ function VisualCueCard({ cue, category }: { cue: VisualCue; category: Category }
   );
 }
 
-function ProgressView({ loading, progress }: { loading: boolean; progress: ProgressSummary | null }) {
+function ProgressView({
+  loading, progress, onReset, resetting,
+}: {
+  loading: boolean;
+  progress: ProgressSummary | null;
+  onReset: () => void;
+  resetting: boolean;
+}) {
   if (loading) {
     return <div className="center-state">A ver o progresso...</div>;
   }
@@ -559,6 +605,10 @@ function ProgressView({ loading, progress }: { loading: boolean; progress: Progr
           <p className="quiet">Ainda não há erros guardados.</p>
         )}
       </div>
+      <button className="reset-btn" onClick={onReset} disabled={resetting}>
+        <Trash2 size={16} aria-hidden="true" />
+        {resetting ? "A apagar..." : "Apagar progresso"}
+      </button>
     </section>
   );
 }

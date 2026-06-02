@@ -2,6 +2,21 @@
 
 All notable changes to Digital Sensei are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Adulto/Criança profile switcher for keeping separate local progress.
+- Progress reset action for clearing one learner's saved attempts without affecting the other.
+
+### Changed
+
+- `Rever erros` now uses the selected learner's weak topics.
+- Quiz prompts no longer include the "No manual," prefix — questions are more direct and natural.
+- Visual cue cards now render per-technique SVG illustrations instead of a generic CSS figure.
+  Each of the 14 techniques has a distinct scene (e.g. outside sweep, inner reap, foot block, shoulder entry, hip throw, side control, mount, north-south, turnover, chain, counter).
+- `visual_cue` model extended with an optional `pose` field used by the frontend to select the correct illustration.
+
 ## [v0.1.0] - 2026-06-01
 
 ### Added

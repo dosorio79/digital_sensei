@@ -36,6 +36,7 @@ def init_db() -> None:
                 selected_answer TEXT NOT NULL,
                 correct INTEGER NOT NULL,
                 mode TEXT NOT NULL,
+                user_id TEXT NOT NULL DEFAULT 'adulto',
                 created_at TEXT NOT NULL
             )
             """
@@ -46,6 +47,10 @@ def init_db() -> None:
             ON attempts (item_id)
             """
         )
+        # migrate: add user_id column if it doesn't exist yet
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(attempts)").fetchall()}
+        if "user_id" not in cols:
+            conn.execute("ALTER TABLE attempts ADD COLUMN user_id TEXT NOT NULL DEFAULT 'adulto'")
 
 
 def record_attempt(attempt: AttemptIn) -> AttemptOut:
@@ -54,8 +59,8 @@ def record_attempt(attempt: AttemptIn) -> AttemptOut:
     with connect() as conn:
         cursor = conn.execute(
             """
-            INSERT INTO attempts (question_id, item_id, selected_answer, correct, mode, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO attempts (question_id, item_id, selected_answer, correct, mode, user_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 attempt.question_id,
@@ -63,6 +68,7 @@ def record_attempt(attempt: AttemptIn) -> AttemptOut:
                 attempt.selected_answer,
                 int(attempt.correct),
                 attempt.mode,
+                attempt.user_id,
                 created_at.isoformat(),
             ),
         )
@@ -75,11 +81,12 @@ def record_attempt(attempt: AttemptIn) -> AttemptOut:
         selected_answer=attempt.selected_answer,
         correct=attempt.correct,
         mode=attempt.mode,
+        user_id=attempt.user_id,
         created_at=created_at,
     )
 
 
-def summarize_progress() -> ProgressSummary:
+def summarize_progress(user_id: str = "adulto") -> ProgressSummary:
     init_db()
     with connect() as conn:
         row = conn.execute(
@@ -90,7 +97,9 @@ def summarize_progress() -> ProgressSummary:
                 SUM(CASE WHEN correct = 0 THEN 1 ELSE 0 END) AS incorrect_count,
                 COUNT(DISTINCT date(created_at)) AS sessions
             FROM attempts
-            """
+            WHERE user_id = ?
+            """,
+            (user_id,),
         ).fetchone()
         topic_rows = conn.execute(
             """
@@ -99,11 +108,13 @@ def summarize_progress() -> ProgressSummary:
                 SUM(CASE WHEN correct = 0 THEN 1 ELSE 0 END) AS incorrect_count,
                 SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) AS correct_count
             FROM attempts
+            WHERE user_id = ?
             GROUP BY item_id
             HAVING incorrect_count > 0
             ORDER BY incorrect_count DESC, correct_count ASC
             LIMIT 5
-            """
+            """,
+            (user_id,),
         ).fetchall()
 
     total = int(row["total"] or 0)
@@ -133,3 +144,11 @@ def summarize_progress() -> ProgressSummary:
         completed_sessions=int(row["sessions"] or 0),
         weak_topics=weak_topics,
     )
+
+
+def reset_progress(user_id: str) -> int:
+    """Delete all attempts for a user. Returns number of rows deleted."""
+    init_db()
+    with connect() as conn:
+        cursor = conn.execute("DELETE FROM attempts WHERE user_id = ?", (user_id,))
+        return cursor.rowcount

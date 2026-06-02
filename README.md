@@ -21,10 +21,11 @@ V1 is quiz-only. It does not use camera, microphone, chat, accounts, or movement
   - `Números`: kanji/number prompts where the child guesses the Japanese name.
   - `Técnicas do Judo`: manual-grounded technique families such as perna, braço, quadril, imobilização, sequência, contra-ataque, and virada.
   - `Rever erros`: weak-topic review.
-  - `Progresso`: simple local progress summary.
-- Original in-app visual cues for techniques, with official sources linked instead of copied.
+  - `Progresso`: simple local progress summary, split by Adulto/Criança learner.
+- Per-technique SVG illustrations shown after answering, with a distinct scene for each of the 14 techniques (sweeps, hip throws, shoulder throws, ground controls, turnovers, sequences).
+- Official sources linked instead of copied.
 - Yellow-orange belt color theme and subtle manual cover background.
-- Local-only SQLite progress storage.
+- Local-only SQLite progress storage with per-learner reset.
 
 ## Project Structure
 
