@@ -53,7 +53,7 @@ def practice_today(
     if mode == "review":
         progress = summarize_progress(user_id)
         weak_ids = [topic.item_id for topic in progress.weak_topics]
-        questions = [question for question in build_practice("treinar_agora", 20) if question.item_id in weak_ids]
+        questions = [question for question in build_practice("treinar_agora", 100) if question.item_id in weak_ids]
         return questions[:limit] or build_practice("treinar_agora", limit)
     return build_practice(mode, limit)
 

@@ -8,10 +8,14 @@ All notable changes to Digital Sensei are documented here.
 
 - Adulto/Criança profile switcher for keeping separate local progress.
 - Progress reset action for clearing one learner's saved attempts without affecting the other.
+- `Demonstrações` tab for the three teacher-assisted guide requirements.
 
 ### Changed
 
 - `Rever erros` now uses the selected learner's weak topics.
+- Practice questions now follow the guide sections more strictly: vocabulary, numbers, technique groups, and demonstrations.
+- Fresh practice sessions now use a new random mix instead of a fixed per-mode order.
+- Answer options now stay within the same answer type, and technique group options use balanced short labels.
 - Quiz prompts no longer include the "No manual," prefix — questions are more direct and natural.
 - Visual cue cards now render per-technique SVG illustrations instead of a generic CSS figure.
   Each of the 14 techniques has a distinct scene (e.g. outside sweep, inner reap, foot block, shoulder entry, hip throw, side control, mount, north-south, turnover, chain, counter).

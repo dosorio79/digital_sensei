@@ -1,5 +1,10 @@
+import random
+
 from backend.digital_sensei.content import build_practice, load_catalog
 from backend.digital_sensei.models import Category
+
+
+TECHNIQUE_LABELS = {"Perna", "Braço", "Quadril", "Imobilização", "Sequência", "Contra-ataque", "Virada"}
 
 
 def test_catalog_loads_manual_backed_content() -> None:
@@ -24,7 +29,7 @@ def test_catalog_loads_manual_backed_content() -> None:
 
 def test_practice_questions_use_curated_items() -> None:
     item_ids = {item.id for item in load_catalog().items}
-    questions = build_practice("treinar_agora", limit=8)
+    questions = build_practice("treinar_agora", limit=8, rng=random.Random(1))
 
     assert len(questions) == 8
     assert {question.item_id for question in questions}.issubset(item_ids)
@@ -39,13 +44,8 @@ def test_obi_accepts_faixa_and_cinto() -> None:
 
 
 def test_numbers_mode_asks_for_japanese_number_names() -> None:
-    questions = build_practice("numeros", limit=10)
-
-    assert len(questions) == 10
-    assert {question.category for question in questions} == {Category.numeros}
-    assert all("/" in question.prompt for question in questions)
-    assert all(question.correct_answer in question.options for question in questions)
-    assert {question.correct_answer for question in questions} == {
+    questions = build_practice("numeros", limit=10, rng=random.Random(2))
+    number_names = {
         "Ichi",
         "Ni",
         "San",
@@ -58,6 +58,40 @@ def test_numbers_mode_asks_for_japanese_number_names() -> None:
         "Ju",
     }
 
+    assert len(questions) == 10
+    assert {question.category for question in questions} == {Category.numeros}
+    assert all(question.correct_answer in question.options for question in questions)
+    assert {question.correct_answer for question in questions} == number_names
+    assert all(set(question.options).issubset(number_names) for question in questions)
+
+
+def test_words_mode_uses_only_vocabulary_with_vocabulary_options() -> None:
+    catalog = load_catalog()
+    vocabulary_meanings = {
+        item.portuguese
+        for item in catalog.items
+        if item.category == Category.vocabulario
+    }
+    technique_labels = {
+        item.portuguese
+        for item in catalog.items
+        if item.category in {Category.nage_waza, Category.ne_waza, Category.sequencias, Category.viradas}
+    } | TECHNIQUE_LABELS
+    number_names = {
+        item.portuguese
+        for item in catalog.items
+        if item.category == Category.numeros
+    }
+    questions = build_practice("palavras", limit=20, rng=random.Random(3))
+
+    assert questions
+    assert {question.category for question in questions} == {Category.vocabulario}
+    for question in questions:
+        assert question.correct_answer in vocabulary_meanings
+        assert set(question.options).issubset(vocabulary_meanings)
+        assert set(question.options).isdisjoint(technique_labels)
+        assert set(question.options).isdisjoint(number_names)
+
 
 def test_technique_group_questions_have_natural_wording_and_relevant_options() -> None:
     vocabulary_ids = {
@@ -65,7 +99,7 @@ def test_technique_group_questions_have_natural_wording_and_relevant_options() -
         for item in load_catalog().items
         if item.category in {Category.vocabulario, Category.numeros}
     }
-    questions = build_practice("tipos", limit=20)
+    questions = build_practice("tipos", limit=20, rng=random.Random(4))
 
     assert questions
     assert all("Que tipo de coisa" not in question.prompt for question in questions)
@@ -73,30 +107,28 @@ def test_technique_group_questions_have_natural_wording_and_relevant_options() -
     assert all(question.item_id not in vocabulary_ids for question in questions)
     for question in questions:
         assert question.correct_answer.lower() not in question.prompt.lower()
+        assert question.correct_answer in TECHNIQUE_LABELS
+        assert set(question.options).issubset(TECHNIQUE_LABELS)
+        assert not any(option.startswith("Técnica") for option in question.options)
         for option in question.options:
             assert option.lower() not in question.prompt.lower()
 
     uki_goshi = next(question for question in questions if question.item_id == "nage-uki-goshi")
-    assert uki_goshi.correct_answer == "Técnica de quadril"
-    assert set(uki_goshi.options) == {
-        "Técnica de perna",
-        "Técnica de braço",
-        "Técnica de quadril",
-        "Técnica de imobilização",
-    }
+    assert uki_goshi.correct_answer == "Quadril"
+    assert set(uki_goshi.options) == {"Perna", "Braço", "Quadril", "Imobilização"}
 
 
 def test_mixed_practice_uses_category_questions_for_techniques() -> None:
     technique_categories = {Category.nage_waza, Category.ne_waza, Category.sequencias, Category.viradas}
-    questions = build_practice("treinar_agora", limit=20)
+    questions = build_practice("treinar_agora", limit=20, rng=random.Random(5))
     technique_questions = [question for question in questions if question.category in technique_categories]
 
     assert technique_questions
     for question in technique_questions:
         assert question.kind == "category"
         assert question.correct_answer in question.options
-        assert "Técnica de projeção" not in question.options
-        assert "Técnica de solo" not in question.options
+        assert set(question.options).issubset(TECHNIQUE_LABELS)
+        assert not any(option.startswith("Técnica") for option in question.options)
         assert {"Professor", "Criador do judo", "Ni"}.isdisjoint(question.options)
 
 
@@ -111,3 +143,10 @@ def test_viradas_meaning_question_uses_curated_position_options() -> None:
         "Uke de barriga para cima",
     }
     assert {"Professor", "Atenção", "Esquerda"}.isdisjoint(viradas_item.answer_options)
+
+
+def test_practice_sessions_can_vary_by_random_seed() -> None:
+    first = build_practice("palavras", limit=8, rng=random.Random(11))
+    second = build_practice("palavras", limit=8, rng=random.Random(12))
+
+    assert [question.item_id for question in first] != [question.item_id for question in second]

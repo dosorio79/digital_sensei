@@ -9,7 +9,7 @@
 
 Digital Sensei is a Portuguese, browser-based quiz app for a 5-year-old judoca training the `graduação amarelo-laranja`. The source manual is stored at `manuals/MANUAL AMARELO LARANJA.pdf`; runtime content is curated in `content/manual_amarelo_laranja.json` so the app stays faithful and reviewable.
 
-V1 is quiz-only. It does not use camera, microphone, chat, accounts, or movement validation.
+V1 is quiz and checklist only. It does not use camera, microphone, chat, accounts, or movement validation.
 
 ## Features
 
@@ -19,7 +19,8 @@ V1 is quiz-only. It does not use camera, microphone, chat, accounts, or movement
   - `Treinar agora`: mixed daily practice.
   - `Palavras japonesas`: vocabulary from the manual.
   - `Números`: kanji/number prompts where the child guesses the Japanese name.
-  - `Técnicas do Judo`: manual-grounded technique families such as perna, braço, quadril, imobilização, sequência, contra-ataque, and virada.
+  - `Técnicas do Judo`: manual-grounded technique groups such as perna, braço, quadril, imobilização, sequência, contra-ataque, and virada.
+  - `Demonstrações`: teacher-assisted guide requirements for sequences, counter-attacks, and turnovers.
   - `Rever erros`: weak-topic review.
   - `Progresso`: simple local progress summary, split by Adulto/Criança learner.
 - Per-technique SVG illustrations shown after answering, with a distinct scene for each of the 14 techniques (sweeps, hip throws, shoulder throws, ground controls, turnovers, sequences).

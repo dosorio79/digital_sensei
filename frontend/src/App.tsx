@@ -1,6 +1,7 @@
 import {
   Award,
   CircleHelp,
+  ClipboardCheck,
   Dumbbell,
   Hash,
   Languages,
@@ -13,23 +14,27 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import {
   type Category,
+  type ContentCatalog,
+  type ContentItem,
   type PracticeQuestion,
   type ProgressSummary,
   type UserId,
   type VisualCue,
+  fetchContent,
   fetchPractice,
   fetchProgress,
   recordAttempt,
   resetProgress
 } from "./api";
 
-type Mode = "treinar_agora" | "palavras" | "numeros" | "tipos" | "review" | "progresso";
+type Mode = "treinar_agora" | "palavras" | "numeros" | "tipos" | "demos" | "review" | "progresso";
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Dumbbell }> = [
   { id: "treinar_agora", label: "Treinar agora", icon: Dumbbell },
   { id: "palavras", label: "Palavras japonesas", icon: Languages },
   { id: "numeros", label: "Números", icon: Hash },
   { id: "tipos", label: "Técnicas do Judo", icon: CircleHelp },
+  { id: "demos", label: "Demonstrações", icon: ClipboardCheck },
   { id: "review", label: "Rever erros", icon: RotateCcw },
   { id: "progresso", label: "Progresso", icon: Trophy }
 ];
@@ -63,9 +68,11 @@ export function App() {
   const [mode, setMode] = useState<Mode>("treinar_agora");
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
+  const [sessionKey, setSessionKey] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
+  const [catalog, setCatalog] = useState<ContentCatalog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
@@ -76,9 +83,15 @@ export function App() {
   function switchUser(next: UserId) {
     localStorage.setItem("ds_user", next);
     setUserId(next);
+    setSessionKey((value) => value + 1);
     setMode("treinar_agora");
     setProgress(null);
     setSelected(null);
+  }
+
+  function restartPractice() {
+    setSessionKey((value) => value + 1);
+    setMode("treinar_agora");
   }
 
   useEffect(() => {
@@ -94,6 +107,23 @@ export function App() {
         })
         .catch(() => {
           if (!ignore) setError("Não consegui carregar o progresso.");
+        })
+        .finally(() => {
+          if (!ignore) setLoading(false);
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+
+    if (mode === "demos") {
+      setLoading(true);
+      fetchContent()
+        .then((data) => {
+          if (!ignore) setCatalog(data);
+        })
+        .catch(() => {
+          if (!ignore) setError("Não consegui carregar as demonstrações.");
         })
         .finally(() => {
           if (!ignore) setLoading(false);
@@ -120,7 +150,7 @@ export function App() {
     return () => {
       ignore = true;
     };
-  }, [mode, userId]);
+  }, [mode, userId, sessionKey]);
 
   const progressPercent = useMemo(() => {
     if (!questions.length || sessionDone) return 100;
@@ -210,6 +240,8 @@ export function App() {
             onReset={handleReset}
             resetting={resetting}
           />
+        ) : mode === "demos" ? (
+          <DemosView loading={loading} catalog={catalog} />
         ) : (
           <QuizView
             loading={loading}
@@ -222,7 +254,7 @@ export function App() {
             progressPercent={progressPercent}
             onChoose={chooseAnswer}
             onNext={nextQuestion}
-            onRestart={() => setMode("treinar_agora")}
+            onRestart={restartPractice}
           />
         )}
       </section>
@@ -564,6 +596,45 @@ function VisualCueCard({ cue, category }: { cue: VisualCue; category: Category }
         </ul>
       </div>
     </aside>
+  );
+}
+
+function demoRequirement(item: ContentItem): string {
+  if (item.id === "seq-ren-raku-waza") return "Demonstrar 2 sequências";
+  if (item.id === "seq-kaeshi-waza") return "Demonstrar 1 contra-ataque";
+  if (item.id === "viradas-decubito-ventral") return "Demonstrar 3 viradas";
+  return item.manual_text;
+}
+
+function DemosView({ loading, catalog }: { loading: boolean; catalog: ContentCatalog | null }) {
+  if (loading) {
+    return <div className="center-state">A preparar as demonstrações...</div>;
+  }
+
+  const items = catalog?.items.filter((item) => item.manual_text.includes("Demonstrar")) ?? [];
+  if (!items.length) {
+    return <div className="center-state">Ainda não há demonstrações para mostrar.</div>;
+  }
+
+  return (
+    <section className="demos-view">
+      {items.map((item) => (
+        <article key={item.id} className="demo-card">
+          <div className="demo-copy">
+            <span className={categoryClass(item.category)}>{CATEGORY_LABELS[item.category]}</span>
+            <h2>{item.japanese}</h2>
+            <strong>{demoRequirement(item)}</strong>
+            <p>{item.child_explanation}</p>
+            {item.media_sources.length ? (
+              <a href={item.media_sources[0].url} target="_blank" rel="noreferrer">
+                Ver referência
+              </a>
+            ) : null}
+          </div>
+          {item.visual_cue ? <VisualCueCard cue={item.visual_cue} category={item.category} /> : null}
+        </article>
+      ))}
+    </section>
   );
 }
 

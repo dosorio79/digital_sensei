@@ -176,7 +176,7 @@ h1 {
 
 .mode-tabs {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -211,6 +211,7 @@ h1 {
 
 .quiz-card,
 .progress-view,
+.demos-view,
 .done-state,
 .center-state {
   align-self: stretch;
@@ -458,6 +459,57 @@ h1 {
   padding: clamp(18px, 5vw, 34px);
 }
 
+.demos-view {
+  display: grid;
+  gap: 0;
+  padding: clamp(18px, 5vw, 34px);
+}
+
+.demo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 2px solid var(--soft-line);
+}
+
+.demo-card:first-child {
+  padding-top: 0;
+}
+
+.demo-card:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.demo-copy {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.demo-copy h2 {
+  margin-bottom: 0;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+}
+
+.demo-copy strong {
+  color: #8a3a04;
+  font-size: 1.05rem;
+}
+
+.demo-copy p {
+  margin-bottom: 0;
+  color: #53635c;
+  font-weight: 800;
+}
+
+.demo-copy a {
+  color: #163f76;
+  font-weight: 900;
+}
+
 .score-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -545,6 +597,7 @@ h1 {
 
   .answers,
   .score-grid,
+  .demo-card,
   .visual-cue {
     grid-template-columns: 1fr;
   }
