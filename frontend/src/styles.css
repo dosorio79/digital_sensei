@@ -576,6 +576,32 @@ h1 {
   font-weight: 900;
 }
 
+.reference-link {
+  width: fit-content;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 2px solid #163f76;
+  border-radius: 8px;
+  background: #edf5ff;
+  color: #163f76;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 4px 0 rgba(22, 63, 118, 0.18);
+}
+
+.reference-link:hover {
+  background: #dcecff;
+  text-decoration: underline;
+}
+
+.reference-link:focus-visible {
+  outline: 3px solid rgba(22, 63, 118, 0.28);
+  outline-offset: 3px;
+}
+
 .feedback-actions {
   display: inline-flex;
   align-items: center;

@@ -5,6 +5,7 @@ import {
   Dumbbell,
   Hash,
   Languages,
+  PlayCircle,
   RotateCcw,
   Sparkles,
   Trash2,
@@ -432,7 +433,13 @@ function QuizView({
               <span>{currentQuestion.child_explanation}</span>
             </span>
             {currentQuestion.media_sources.length ? (
-              <a href={currentQuestion.media_sources[0].url} target="_blank" rel="noreferrer">
+              <a
+                className="reference-link"
+                href={currentQuestion.media_sources[0].url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <PlayCircle size={20} aria-hidden="true" />
                 Ver referência
               </a>
             ) : null}
@@ -786,7 +793,13 @@ function DemosView({
               </span>
               <p>{item.child_explanation}</p>
               {item.media_sources.length ? (
-                <a href={item.media_sources[0].url} target="_blank" rel="noreferrer">
+                <a
+                  className="reference-link"
+                  href={item.media_sources[0].url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <PlayCircle size={20} aria-hidden="true" />
                   Ver referência
                 </a>
               ) : null}
