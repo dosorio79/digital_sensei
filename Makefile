@@ -11,7 +11,7 @@ help:
 	@printf "  make install          Install backend dev deps and frontend deps\n"
 	@printf "  make api              Run the FastAPI dev server on 127.0.0.1:8000\n"
 	@printf "  make frontend-dev     Run the Vite dev server\n"
-	@printf "  make test             Run backend tests and frontend production build\n"
+	@printf "  make test             Run backend tests, frontend tests, and frontend production build\n"
 	@printf "  make build            Build the frontend\n"
 	@printf "  make serve            Build frontend and serve the full app on $(HOST):$(PORT)\n"
 	@printf "  make docker-build     Build the Docker image\n"
@@ -41,7 +41,9 @@ test: backend-test frontend-test
 backend-test:
 	$(UV) run --extra dev pytest -q
 
-frontend-test: frontend-build
+frontend-test:
+	$(NPM) --prefix frontend run test
+	$(NPM) --prefix frontend run build
 
 serve: build
 	$(UV) run uvicorn backend.digital_sensei.app:app --host $(HOST) --port $(PORT)

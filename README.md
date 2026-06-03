@@ -100,7 +100,9 @@ Open `http://127.0.0.1:8001`.
 
 ```bash
 uv run --extra dev pytest
-cd frontend && npm run build
+cd frontend
+npm run test
+npm run build
 ```
 
 or:
