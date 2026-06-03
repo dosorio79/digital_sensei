@@ -9,7 +9,9 @@ import {
   Sparkles,
   Trash2,
   Trophy,
-  UserRound
+  UserRound,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -26,6 +28,8 @@ import {
   recordAttempt,
   resetProgress
 } from "./api";
+import { useSoundEffects } from "./useSoundEffects";
+import { type SpeechControls, useSpeech } from "./useSpeech";
 
 type Mode = "treinar_agora" | "palavras" | "numeros" | "tipos" | "demos" | "review" | "progresso";
 
@@ -63,6 +67,21 @@ function storedUser(): UserId {
   return localStorage.getItem("ds_user") === "crianca" ? "crianca" : "adulto";
 }
 
+function answerSpeechId(questionId: string, option: string): string {
+  return `answer-${questionId}-${option}`;
+}
+
+function visualCueSpeechText(cue: VisualCue): string {
+  return `${cue.label}. ${cue.action}. ${cue.hints.join(". ")}.`;
+}
+
+function answerFeedbackSpeechText(question: PracticeQuestion, answer: string): string {
+  const answeredCorrectly = answer === question.correct_answer;
+  const result = answeredCorrectly ? "Boa!" : `Quase. A resposta certa é ${question.correct_answer}.`;
+  const cueText = question.visual_cue ? ` ${visualCueSpeechText(question.visual_cue)}` : "";
+  return `${result} ${question.child_explanation}${cueText}`;
+}
+
 export function App() {
   const [userId, setUserId] = useState<UserId>(storedUser);
   const [mode, setMode] = useState<Mode>("treinar_agora");
@@ -76,11 +95,19 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
+  const speech = useSpeech();
+  const soundEffects = useSoundEffects();
 
   const currentQuestion = questions[questionIndex];
   const sessionDone = questions.length > 0 && questionIndex >= questions.length;
 
+  function switchMode(next: Mode) {
+    speech.stop();
+    setMode(next);
+  }
+
   function switchUser(next: UserId) {
+    speech.stop();
     localStorage.setItem("ds_user", next);
     setUserId(next);
     setSessionKey((value) => value + 1);
@@ -90,6 +117,7 @@ export function App() {
   }
 
   function restartPractice() {
+    speech.stop();
     setSessionKey((value) => value + 1);
     setMode("treinar_agora");
   }
@@ -159,10 +187,13 @@ export function App() {
 
   async function chooseAnswer(answer: string) {
     if (!currentQuestion || selected) return;
+    const answeredCorrectly = answer === currentQuestion.correct_answer;
     setSelected(answer);
-    if (answer === currentQuestion.correct_answer) {
+    if (answeredCorrectly) {
       setCorrectCount((value) => value + 1);
+      soundEffects.playCorrect();
     }
+    speech.speak(answerFeedbackSpeechText(currentQuestion, answer), { id: `feedback-${currentQuestion.id}` });
     try {
       await recordAttempt(currentQuestion, answer, userId);
     } catch {
@@ -171,12 +202,14 @@ export function App() {
   }
 
   function nextQuestion() {
+    speech.stop();
     setSelected(null);
     setQuestionIndex((value) => value + 1);
   }
 
   async function handleReset() {
     if (!confirm(`Apagar todo o progresso de ${userId === "adulto" ? "Adulto" : "Criança"}?`)) return;
+    speech.stop();
     setResetting(true);
     try {
       await resetProgress(userId);
@@ -197,20 +230,40 @@ export function App() {
             <p className="eyebrow">Digital Sensei</p>
             <h1>Graduação amarelo-laranja</h1>
           </div>
-          <div className="user-switcher">
-            <UserRound size={16} aria-hidden="true" />
-            <button
-              className={userId === "adulto" ? "active" : ""}
-              onClick={() => switchUser("adulto")}
-            >
-              Adulto
-            </button>
-            <button
-              className={userId === "crianca" ? "active" : ""}
-              onClick={() => switchUser("crianca")}
-            >
-              Criança
-            </button>
+          <div className="topbar-controls">
+            <div className="audio-controls" aria-label="Controlos de som">
+              <AudioToggle
+                enabled={speech.enabled}
+                supported={speech.supported}
+                onToggle={() => speech.setEnabled(!speech.enabled)}
+                label={speech.enabled ? "Desligar leitura" : "Ligar leitura"}
+                enabledText="Leitura"
+                disabledText="Leitura"
+              />
+              <AudioToggle
+                enabled={soundEffects.enabled}
+                supported={soundEffects.supported}
+                onToggle={() => soundEffects.setEnabled(!soundEffects.enabled)}
+                label={soundEffects.enabled ? "Desligar som de acerto" : "Ligar som de acerto"}
+                enabledText="Acerto"
+                disabledText="Acerto"
+              />
+            </div>
+            <div className="user-switcher">
+              <UserRound size={16} aria-hidden="true" />
+              <button
+                className={userId === "adulto" ? "active" : ""}
+                onClick={() => switchUser("adulto")}
+              >
+                Adulto
+              </button>
+              <button
+                className={userId === "crianca" ? "active" : ""}
+                onClick={() => switchUser("crianca")}
+              >
+                Criança
+              </button>
+            </div>
           </div>
         </header>
 
@@ -221,7 +274,7 @@ export function App() {
               <button
                 key={item.id}
                 className={mode === item.id ? "active" : ""}
-                onClick={() => setMode(item.id)}
+                onClick={() => switchMode(item.id)}
                 title={item.label}
               >
                 <Icon size={20} aria-hidden="true" />
@@ -252,6 +305,7 @@ export function App() {
             sessionDone={sessionDone}
             correctCount={correctCount}
             progressPercent={progressPercent}
+            speech={speech}
             onChoose={chooseAnswer}
             onNext={nextQuestion}
             onRestart={restartPractice}
@@ -271,6 +325,7 @@ function QuizView({
   sessionDone,
   correctCount,
   progressPercent,
+  speech,
   onChoose,
   onNext,
   onRestart
@@ -283,6 +338,7 @@ function QuizView({
   sessionDone: boolean;
   correctCount: number;
   progressPercent: number;
+  speech: SpeechControls;
   onChoose: (answer: string) => void;
   onNext: () => void;
   onRestart: () => void;
@@ -314,6 +370,14 @@ function QuizView({
 
   const answeredCorrectly = selected === currentQuestion.correct_answer;
   const tag = questionTag(currentQuestion, selected);
+  const answerItems = currentQuestion.options.map((option) => ({
+    id: answerSpeechId(currentQuestion.id, option),
+    text: option
+  }));
+  const questionAndAnswerItems = [
+    { id: `question-${currentQuestion.id}`, text: currentQuestion.prompt },
+    ...answerItems
+  ];
 
   return (
     <section className="quiz-card">
@@ -326,24 +390,34 @@ function QuizView({
       <div className="progress-track" aria-hidden="true">
         <div style={{ width: `${progressPercent}%` }} />
       </div>
-      <h2>{currentQuestion.prompt}</h2>
+      <div className="question-heading">
+        <h2>{currentQuestion.prompt}</h2>
+        <SequenceListenButton
+          speech={speech}
+          items={questionAndAnswerItems}
+          label="Ouvir pergunta e respostas"
+        />
+      </div>
       <div className="answers">
         {currentQuestion.options.map((option) => {
           const isCorrect = option === currentQuestion.correct_answer;
           const isSelected = option === selected;
+          const speechId = answerSpeechId(currentQuestion.id, option);
           let className = "answer-button";
           if (selected && isCorrect) className += " correct";
           if (selected && isSelected && !isCorrect) className += " wrong";
+          if (speech.isSpeaking(speechId)) className += " reading";
 
           return (
-            <button
-              key={option}
-              className={className}
-              disabled={Boolean(selected)}
-              onClick={() => onChoose(option)}
-            >
-              {option}
-            </button>
+            <div key={option} className="answer-choice">
+              <button
+                className={className}
+                disabled={Boolean(selected)}
+                onClick={() => onChoose(option)}
+              >
+                {option}
+              </button>
+            </div>
           );
         })}
       </div>
@@ -351,7 +425,12 @@ function QuizView({
         <div className={answeredCorrectly ? "feedback good" : "feedback retry"}>
           <strong>{answeredCorrectly ? "Boa!" : "Quase."}</strong>
           <span>
-            {currentQuestion.child_explanation}
+            <span className="correct-answer">
+              Resposta certa: <strong>{currentQuestion.correct_answer}</strong>
+            </span>
+            <span className="explanation-line">
+              <span>{currentQuestion.child_explanation}</span>
+            </span>
             {currentQuestion.media_sources.length ? (
               <a href={currentQuestion.media_sources[0].url} target="_blank" rel="noreferrer">
                 Ver referência
@@ -361,10 +440,72 @@ function QuizView({
           {currentQuestion.visual_cue ? (
             <VisualCueCard cue={currentQuestion.visual_cue} category={currentQuestion.category} />
           ) : null}
-          <button onClick={onNext}>{questionIndex + 1 === questions.length ? "Terminar" : "Próxima"}</button>
+          <div className="feedback-actions">
+            <button onClick={onNext}>{questionIndex + 1 === questions.length ? "Terminar" : "Próxima"}</button>
+          </div>
         </div>
       ) : null}
     </section>
+  );
+}
+
+function AudioToggle({
+  enabled,
+  supported,
+  onToggle,
+  label,
+  enabledText,
+  disabledText
+}: {
+  enabled: boolean;
+  supported: boolean;
+  onToggle: () => void;
+  label: string;
+  enabledText: string;
+  disabledText: string;
+}) {
+  const Icon = supported && enabled ? Volume2 : VolumeX;
+  return (
+    <button
+      className={enabled ? "audio-toggle active" : "audio-toggle"}
+      onClick={onToggle}
+      disabled={!supported}
+      aria-pressed={supported ? enabled : undefined}
+      aria-label={supported ? label : `${disabledText} indisponível`}
+      title={supported ? label : `${disabledText} indisponível neste navegador`}
+      type="button"
+    >
+      <Icon size={16} aria-hidden="true" />
+      <span>{enabled ? enabledText : disabledText}</span>
+    </button>
+  );
+}
+
+function SequenceListenButton({
+  speech,
+  items,
+  label,
+  text
+}: {
+  speech: SpeechControls;
+  items: Array<{ id: string; text: string }>;
+  label: string;
+  text?: string;
+}) {
+  const disabled = !speech.supported || !speech.enabled || items.every((item) => !item.text.trim());
+  const speaking = items.some((item) => speech.isSpeaking(item.id));
+  return (
+    <button
+      className={`${speaking ? "sequence-listen-button speaking" : "sequence-listen-button"}${text ? "" : " compact"}`}
+      onClick={() => speech.speakSequence(items)}
+      disabled={disabled}
+      aria-label={label}
+      title={disabled ? "Leitura desligada ou indisponível" : label}
+      type="button"
+    >
+      <Volume2 size={18} aria-hidden="true" />
+      {text ? <span>{text}</span> : null}
+    </button>
   );
 }
 
@@ -580,14 +721,22 @@ function TechniqueIllustration({ pose, category }: { pose?: string; category: Ca
   );
 }
 
-function VisualCueCard({ cue, category }: { cue: VisualCue; category: Category }) {
+function VisualCueCard({
+  cue,
+  category
+}: {
+  cue: VisualCue;
+  category: Category;
+}) {
   return (
     <aside className={`visual-cue ${category}`} aria-label={`Pista visual: ${cue.label}`}>
       <div className="cue-figure">
         <TechniqueIllustration pose={cue.pose} category={category} />
       </div>
       <div className="cue-copy">
-        <strong>{cue.label}</strong>
+        <div className="cue-title">
+          <strong>{cue.label}</strong>
+        </div>
         <span>{cue.action}</span>
         <ul>
           {cue.hints.map((hint) => (
@@ -606,7 +755,13 @@ function demoRequirement(item: ContentItem): { count: string; label: string } {
   return { count: "Demo", label: item.manual_text };
 }
 
-function DemosView({ loading, catalog }: { loading: boolean; catalog: ContentCatalog | null }) {
+function DemosView({
+  loading,
+  catalog
+}: {
+  loading: boolean;
+  catalog: ContentCatalog | null;
+}) {
   if (loading) {
     return <div className="center-state">A preparar as demonstrações...</div>;
   }
@@ -636,7 +791,9 @@ function DemosView({ loading, catalog }: { loading: boolean; catalog: ContentCat
                 </a>
               ) : null}
             </div>
-            {item.visual_cue ? <VisualCueCard cue={item.visual_cue} category={item.category} /> : null}
+            {item.visual_cue ? (
+              <VisualCueCard cue={item.visual_cue} category={item.category} />
+            ) : null}
           </article>
         );
       })}
