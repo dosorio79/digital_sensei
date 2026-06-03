@@ -1,10 +1,10 @@
 # Digital Sensei
 
-![Release](https://img.shields.io/badge/release-v0.2.0-f26a21)
+![Release](https://img.shields.io/badge/release-v0.3.0-f26a21)
 ![Python](https://img.shields.io/badge/python-3.11-24352e)
 ![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-ffd735)
-![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20vite-17201d)
+![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20vitest%20%2B%20vite-17201d)
 ![Safety](https://img.shields.io/badge/child%20safety-no%20camera%20%7C%20no%20chat-2f855a)
 
 Digital Sensei is a Portuguese, browser-based quiz app for a 5-year-old judoca training the `graduação amarelo-laranja`. The source manual is stored at `manuals/MANUAL AMARELO LARANJA.pdf`; runtime content is curated in `content/manual_amarelo_laranja.json` so the app stays faithful and reviewable.
@@ -24,7 +24,8 @@ V1 is quiz and checklist only. It does not use camera, microphone, chat, account
   - `Rever erros`: weak-topic review.
   - `Progresso`: simple local progress summary, split by Adulto/Criança learner.
 - Per-technique SVG illustrations shown after answering, with a distinct scene for each of the 14 techniques (sweeps, hip throws, shoulder throws, ground controls, turnovers, sequences).
-- Official sources linked instead of copied.
+- Browser read-aloud support for questions, answer options, feedback, and explanations, with a short correct-answer chime.
+- Official sources linked instead of copied, with prominent reference-video actions.
 - Yellow-orange belt color theme and subtle manual cover background.
 - Local-only SQLite progress storage with per-learner reset.
 
@@ -36,6 +37,7 @@ V1 is quiz and checklist only. It does not use camera, microphone, chat, account
 - `manuals/`: original PDF manual.
 - `docs/`: extraction and deployment notes.
 - `tests/`: backend API and content tests.
+- Frontend tests live alongside React source files under `frontend/src`.
 
 ## Local Development
 
@@ -143,6 +145,6 @@ Then open `http://localhost:8000`.
 
 ## Release
 
-Current release: `v0.2.0`.
+Current release: `v0.3.0`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.

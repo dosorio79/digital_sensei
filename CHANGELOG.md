@@ -4,6 +4,24 @@ All notable changes to Digital Sensei are documented here.
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-06-03
+
+### Added
+
+- Browser text-to-speech controls for reading questions, answer options, and answer feedback aloud in European Portuguese.
+- Correct-answer chime using the browser Web Audio API.
+- Frontend unit/component test coverage with Vitest, jsdom, and React Testing Library for speech, sound effects, quiz audio behavior, answer highlighting, and reference links.
+- CI now runs backend tests, frontend tests, and the frontend production build through `make test`.
+
+### Changed
+
+- Question prompts and answer options are easier to use for a non-reading child: the question speaker now reads the prompt followed by all answer options, highlighting each answer as it is read.
+- Answer feedback now auto-reads after the child chooses an answer, including the correct answer when needed and the visual cue text.
+- Reference links now render as more visible play-style action links.
+- Training interface visuals were polished for the child-facing practice flow.
+- Number prompts now stay aligned with the manual format.
+- Technique question prompts are more natural and direct.
+
 ## [v0.2.0] - 2026-06-02
 
 ### Added
