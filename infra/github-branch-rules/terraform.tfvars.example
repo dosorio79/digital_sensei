@@ -1,0 +1,12 @@
+github_owner           = "dosorio79"
+github_repository_name = "digital_sensei"
+
+production_branch  = "master"
+development_branch = "dev"
+
+# GitHub Actions job name from .github/workflows/ci.yml.
+required_status_check_contexts = ["Test"]
+
+# Tune these if working solo or with a team.
+master_required_approving_review_count = 1
+dev_required_approving_review_count    = 0

@@ -22,3 +22,15 @@ frontend/*.tsbuildinfo
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+.env
+.env.*
+!.env.example
+!*.env.example
