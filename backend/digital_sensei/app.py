@@ -23,7 +23,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Digital Sensei", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="Digital Sensei", version="0.3.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

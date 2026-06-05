@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: digital-sensei
+    runtime: docker
+    plan: free
+    repo: https://github.com/dosorio79/digital_sensei
+    branch: master
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    healthCheckPath: /api/health
