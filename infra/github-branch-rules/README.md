@@ -6,6 +6,7 @@ This Terraform root module manages GitHub branch setup only:
 - Protects `master`.
 - Protects `dev`.
 - Requires the GitHub Actions `Test` check before protected-branch merges.
+- Requires pull requests for `master` and `dev`, but defaults to zero required approvals for solo-project use.
 
 Render deployment is intentionally managed by root `render.yaml`, not Terraform.
 

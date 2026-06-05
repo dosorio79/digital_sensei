@@ -29,9 +29,9 @@ variable "required_status_check_contexts" {
 }
 
 variable "master_required_approving_review_count" {
-  description = "Approving reviews required before merging to master."
+  description = "Approving reviews required before merging to master. Zero is suitable for solo repositories that still require PRs and CI."
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "dev_required_approving_review_count" {
