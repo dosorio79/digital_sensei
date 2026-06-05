@@ -27,6 +27,32 @@ def test_catalog_loads_manual_backed_content() -> None:
     assert all(item.visual_cue for item in catalog.items if item.category in technique_categories)
 
 
+def test_technique_summaries_are_tightened_beyond_group_labels() -> None:
+    technique_categories = {Category.nage_waza, Category.ne_waza, Category.sequencias, Category.viradas}
+    items = [item for item in load_catalog().items if item.category in technique_categories]
+    generic_fragments = [
+        "pertence às técnicas",
+        "pertence as técnicas",
+        "pertence às imobilizações",
+        "também fica nas técnicas",
+        "é uma técnica de quê",
+    ]
+
+    assert items
+    for item in items:
+        assert len(item.child_explanation) >= 60
+        assert not any(fragment in item.child_explanation.lower() for fragment in generic_fragments)
+
+
+def test_manual_technique_visual_cues_use_distinct_poses() -> None:
+    technique_categories = {Category.nage_waza, Category.ne_waza, Category.sequencias, Category.viradas}
+    items = [item for item in load_catalog().items if item.category in technique_categories]
+    poses = [item.visual_cue.pose for item in items if item.visual_cue]
+
+    assert len(poses) == len(items)
+    assert len(poses) == len(set(poses))
+
+
 def test_practice_questions_use_curated_items() -> None:
     item_ids = {item.id for item in load_catalog().items}
     questions = build_practice("treinar_agora", limit=8, rng=random.Random(1))

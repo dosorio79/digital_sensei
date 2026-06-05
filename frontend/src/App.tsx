@@ -1,5 +1,6 @@
 import {
   Award,
+  BookOpen,
   CircleHelp,
   ClipboardCheck,
   Dumbbell,
@@ -32,17 +33,20 @@ import {
 import { useSoundEffects } from "./useSoundEffects";
 import { type SpeechControls, useSpeech } from "./useSpeech";
 
-type Mode = "treinar_agora" | "palavras" | "numeros" | "tipos" | "demos" | "review" | "progresso";
+type Mode = "treinar_agora" | "palavras" | "numeros" | "tipos" | "glossario" | "demos" | "review" | "progresso";
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Dumbbell }> = [
   { id: "treinar_agora", label: "Treinar agora", icon: Dumbbell },
   { id: "palavras", label: "Palavras japonesas", icon: Languages },
   { id: "numeros", label: "Números", icon: Hash },
   { id: "tipos", label: "Técnicas do Judo", icon: CircleHelp },
+  { id: "glossario", label: "Glossário", icon: BookOpen },
   { id: "demos", label: "Demonstrações", icon: ClipboardCheck },
   { id: "review", label: "Rever erros", icon: RotateCcw },
   { id: "progresso", label: "Progresso", icon: Trophy }
 ];
+
+const TECHNIQUE_CATEGORIES: Category[] = ["nage_waza", "ne_waza", "sequencias", "viradas"];
 
 const CATEGORY_LABELS: Record<Category, string> = {
   vocabulario: "Vocabulário",
@@ -145,14 +149,14 @@ export function App() {
       };
     }
 
-    if (mode === "demos") {
+    if (mode === "demos" || mode === "glossario") {
       setLoading(true);
       fetchContent()
         .then((data) => {
           if (!ignore) setCatalog(data);
         })
         .catch(() => {
-          if (!ignore) setError("Não consegui carregar as demonstrações.");
+          if (!ignore) setError(mode === "glossario" ? "Não consegui carregar o glossário." : "Não consegui carregar as demonstrações.");
         })
         .finally(() => {
           if (!ignore) setLoading(false);
@@ -296,6 +300,8 @@ export function App() {
           />
         ) : mode === "demos" ? (
           <DemosView loading={loading} catalog={catalog} />
+        ) : mode === "glossario" ? (
+          <GlossaryView loading={loading} catalog={catalog} />
         ) : (
           <QuizView
             loading={loading}
@@ -574,30 +580,69 @@ function TechniqueIllustration({ pose, category }: { pose?: string; category: Ca
           <JudokaFigure cx={126} angle={-22} ax={126} ay={76} />
         </>
       )}
-      {p === "shoulder_throw" && (
+      {p === "ippon_seoi" && (
         <>
-          {/* tori in entry: head low, bent, back to uke */}
+          {/* one-arm shoulder entry: one clear sleeve/shoulder line */}
           <circle cx={72} cy={65} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
           <line x1={72} y1={74} x2={82} y2={86} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
-          <line x1={66} y1={80} x2={56} y2={68} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={66} y1={80} x2={54} y2={72} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
           <line x1={82} y1={79} x2={108} y2={70} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
           <line x1={82} y1={86} x2={73} y2={108} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
           <line x1={82} y1={86} x2={92} y2={108} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
-          {/* uke going over shoulder */}
           <JudokaFigure cx={128} fy={92} angle={-62} ax={108} ay={70} />
-          {/* rotation arc */}
-          <path d="M 108 70 Q 122 44 130 60" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <path d="M 110 70 Q 124 42 132 60" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
           <polygon points="130,60 122,56 125,65" fill={IC_O} />
+        </>
+      )}
+      {p === "morote_seoi" && (
+        <>
+          {/* two-hand shoulder entry: two orange grip lines into the same shoulder turn */}
+          <circle cx={72} cy={64} r={9} fill={IC_F} stroke={IC_D} strokeWidth={IC_SW} />
+          <line x1={72} y1={73} x2={82} y2={88} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={82} y1={79} x2={106} y2={66} stroke={IC_O} strokeWidth={3} strokeLinecap="round" />
+          <line x1={79} y1={82} x2={110} y2={80} stroke={IC_O} strokeWidth={3} strokeLinecap="round" />
+          <line x1={82} y1={88} x2={66} y2={108} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <line x1={82} y1={88} x2={98} y2={108} stroke={IC_D} strokeWidth={IC_SW} strokeLinecap="round" />
+          <JudokaFigure cx={126} fy={90} angle={-48} ax={108} ay={74} />
+          <path d="M 106 68 Q 130 48 142 72" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" strokeDasharray="5 3" />
+          <polygon points="142,72 133,69 138,78" fill={IC_O} />
+        </>
+      )}
+      {p === "o_goshi" && (
+        <>
+          <JudokaFigure cx={62} />
+          {/* deep hip contact for O goshi */}
+          <ellipse cx={76} cy={78} rx={13} ry={7} fill={IC_O} opacity={0.75} />
+          <line x1={64} y1={64} x2={102} y2={60} stroke={IC_O} strokeWidth={3} strokeLinecap="round" />
+          <JudokaFigure cx={122} fy={92} angle={-48} ax={78} ay={76} />
+          <path d="M 78 66 Q 108 40 124 58" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <polygon points="124,58 115,56 118,65" fill={IC_O} />
+        </>
+      )}
+      {p === "uki_goshi" && (
+        <>
+          {/* shallow floating hip turn, more upright than O goshi */}
+          <JudokaFigure cx={66} />
+          <ellipse cx={82} cy={80} rx={8} ry={4} fill={IC_O} opacity={0.75} />
+          <line x1={66} y1={64} x2={104} y2={74} stroke={IC_O} strokeWidth={3} strokeLinecap="round" />
+          <JudokaFigure cx={124} fy={96} angle={-28} ax={84} ay={80} />
+          <path d="M 84 70 Q 106 54 130 70" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <polygon points="130,70 121,67 124,76" fill={IC_O} />
+        </>
+      )}
+      {p === "shoulder_throw" && (
+        <>
+          <JudokaFigure cx={70} />
+          <JudokaFigure cx={125} fy={92} angle={-52} ax={104} ay={72} />
+          <path d="M 104 72 Q 124 46 136 66" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+          <polygon points="136,66 127,63 131,72" fill={IC_O} />
         </>
       )}
       {p === "hip_throw" && (
         <>
           <JudokaFigure cx={62} />
-          {/* hip contact indicator */}
           <ellipse cx={78} cy={76} rx={9} ry={5} fill={IC_O} opacity={0.75} />
-          {/* uke going over hip */}
           <JudokaFigure cx={122} fy={92} angle={-48} ax={78} ay={76} />
-          {/* rotation arc */}
           <path d="M 78 66 Q 108 40 124 58" stroke={IC_O} strokeWidth={2.5} fill="none" strokeLinecap="round" />
           <polygon points="124,58 115,56 118,65" fill={IC_O} />
         </>
@@ -715,7 +760,8 @@ function TechniqueIllustration({ pose, category }: { pose?: string; category: Ca
           <polygon points="60,78 68,73 67,83" fill={IC_O} />
         </>
       )}
-      {!["sweep_out","sweep_in","foot_block","shoulder_throw","hip_throw",
+      {!["sweep_out","sweep_in","foot_block","ippon_seoi","morote_seoi",
+         "o_goshi","uki_goshi","shoulder_throw","hip_throw",
          "kesa_gatame","yoko_shiho","kami_shiho","tate_shiho",
          "turnover","chain","counter"].includes(p) && (
         <>
@@ -808,6 +854,64 @@ function DemosView({
               <VisualCueCard cue={item.visual_cue} category={item.category} />
             ) : null}
           </article>
+        );
+      })}
+    </section>
+  );
+}
+
+function GlossaryView({
+  loading,
+  catalog
+}: {
+  loading: boolean;
+  catalog: ContentCatalog | null;
+}) {
+  if (loading) {
+    return <div className="center-state">A preparar o glossário...</div>;
+  }
+
+  const techniqueItems = catalog?.items.filter((item) => TECHNIQUE_CATEGORIES.includes(item.category)) ?? [];
+  if (!techniqueItems.length) {
+    return <div className="center-state">Ainda não há técnicas no glossário.</div>;
+  }
+
+  return (
+    <section className="glossary-view" aria-label="Glossário de técnicas">
+      {TECHNIQUE_CATEGORIES.map((category) => {
+        const items = techniqueItems.filter((item) => item.category === category);
+        if (!items.length) return null;
+
+        return (
+          <section key={category} className="glossary-group" aria-labelledby={`glossary-${category}`}>
+            <h2 id={`glossary-${category}`}>{CATEGORY_LABELS[category]}</h2>
+            <div className="glossary-grid">
+              {items.map((item) => (
+                <article key={item.id} className="glossary-card">
+                  <div className="glossary-copy">
+                    <span className={categoryClass(item.category)}>{item.portuguese}</span>
+                    <h3>{item.japanese}</h3>
+                    <p className="manual-line">{item.manual_text}</p>
+                    <p>{item.child_explanation}</p>
+                    {item.media_sources.length ? (
+                      <a
+                        className="reference-link"
+                        href={item.media_sources[0].url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <PlayCircle size={20} aria-hidden="true" />
+                        Ver referência
+                      </a>
+                    ) : null}
+                  </div>
+                  {item.visual_cue ? (
+                    <VisualCueCard cue={item.visual_cue} category={item.category} />
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
         );
       })}
     </section>
