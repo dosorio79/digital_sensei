@@ -157,6 +157,10 @@ button {
   color: #8a3a04;
 }
 
+.voice-settings-panel[hidden] {
+  display: none;
+}
+
 .voice-settings-panel {
   flex-basis: min(100%, 520px);
   display: grid;
