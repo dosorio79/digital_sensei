@@ -7,6 +7,7 @@ This Terraform root module manages GitHub branch setup only:
 - Protects `dev`.
 - Requires the GitHub Actions `Test` check before protected-branch merges.
 - Requires pull requests for `master` and `dev`, but defaults to zero required approvals for solo-project use.
+- Allows merge commits on `dev` so it can be synced from `master` with a normal merge instead of force pushes.
 
 Render deployment is intentionally managed by root `render.yaml`, not Terraform.
 
@@ -51,3 +52,26 @@ terraform import github_branch.dev digital_sensei:dev
 ```
 
 Do not commit `terraform.tfvars` or Terraform state files.
+
+## Sync Workflow
+
+Use feature branches for normal work:
+
+```bash
+git switch dev
+git pull origin dev
+git switch -c feature/my-change
+```
+
+Open PRs from feature branches into `dev`, then open a PR from `dev` into `master` for release.
+
+After a release PR is merged into `master`, sync `dev` without rewriting history:
+
+```bash
+git switch dev
+git fetch origin
+git merge origin/master
+git push origin dev
+```
+
+`master` remains the Render deployment branch. `dev` is allowed to contain merge commits specifically to avoid protected-branch force pushes during this sync step.

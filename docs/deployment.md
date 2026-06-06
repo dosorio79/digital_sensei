@@ -17,6 +17,22 @@ Free Render web services cannot attach persistent disks. The app still writes SQ
 
 GitHub branch setup is managed separately by Terraform in `infra/github-branch-rules`. Terraform is intentionally limited to branch creation/protection; it does not manage Render.
 
+## Branch And Release Flow
+
+- `dev` is the integration branch.
+- `master` is the Render deployment branch.
+- Work should land through feature branches into `dev`, then through a release PR from `dev` into `master`.
+- After a release PR merges, sync `dev` from `master` with a normal merge commit:
+
+```bash
+git switch dev
+git fetch origin
+git merge origin/master
+git push origin dev
+```
+
+The `dev` branch protection intentionally allows merge commits so this sync does not require force pushes. `master` remains protected for deployment.
+
 ## Local Docker
 
 ```bash
