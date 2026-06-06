@@ -33,7 +33,8 @@ describe("useSpeech", () => {
         { lang: "en-US", name: "English" },
         { lang: "pt-BR", name: "Portuguese Brazil", voiceURI: "pt-BR" },
         { lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" },
-        { lang: "pt-PT", name: "Microsoft Helia Natural", voiceURI: "helia-natural" }
+        { lang: "pt-PT", name: "Microsoft Helia Natural", voiceURI: "helia-natural" },
+        { lang: "pt-PT", name: "Microsoft Duarte Natural", voiceURI: "duarte-natural" }
       ]
     });
     const { result } = renderHook(() => useSpeech());
@@ -47,7 +48,7 @@ describe("useSpeech", () => {
     expect(utterance.rate).toBe(0.78);
     expect(utterance.pitch).toBe(1.05);
     expect(utterance.volume).toBe(1);
-    expect(utterance.voice?.name).toBe("Microsoft Helia Natural");
+    expect(utterance.voice?.name).toBe("Microsoft Duarte Natural");
     expect(getSpeechCancelCalls()).toBe(1);
   });
 
