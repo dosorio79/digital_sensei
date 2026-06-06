@@ -238,7 +238,7 @@ describe("App audio behavior", () => {
 
     const voiceButton = screen.getByRole("button", { name: "Voz" });
     expect(voiceButton).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByLabelText("Escolher voz de leitura")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Escolher voz de leitura")).not.toBeVisible();
 
     await user.click(voiceButton);
 
@@ -253,11 +253,11 @@ describe("App audio behavior", () => {
     expect(getSpeechUtterances()[0].text).toBe("Olá. Vamos treinar judo com Ô soto gari.");
 
     await user.click(screen.getByRole("button", { name: "Palavras japonesas" }));
-    expect(screen.queryByText("Voz de leitura")).not.toBeInTheDocument();
+    expect(screen.queryByText("Voz de leitura")).not.toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "Voz" }));
-    expect(screen.getByText("Voz de leitura")).toBeInTheDocument();
+    expect(screen.getByText("Voz de leitura")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Criança" }));
-    expect(screen.queryByText("Voz de leitura")).not.toBeInTheDocument();
+    expect(screen.queryByText("Voz de leitura")).not.toBeVisible();
   });
 });

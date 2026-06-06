@@ -552,38 +552,36 @@ function VoiceControls({
         <Volume2 size={16} aria-hidden="true" />
         <span>Voz</span>
       </button>
-      {open ? (
-        <div id="voice-settings-panel" className="voice-settings-panel">
-          <div className="voice-settings-copy">
-            <label htmlFor="voice-select">Voz de leitura</label>
-            <span title={selectedVoiceName}>{selectedVoiceName}</span>
-          </div>
-          <div className="voice-settings-controls">
-            <select
-              id="voice-select"
-              value={speech.selectedVoiceURI}
-              onChange={(event) => speech.setSelectedVoiceURI(event.target.value)}
-              aria-label="Escolher voz de leitura"
-            >
-              {speech.availableVoices.map((voice) => (
-                <option key={voice.voiceURI} value={voice.voiceURI}>
-                  {speech.voiceOptionLabel(voice)}
-                </option>
-              ))}
-            </select>
-            <button
-              className="voice-test-button"
-              type="button"
-              onClick={() => speech.speak("Olá. Vamos treinar judo com O soto gari.", { id: "voice-test" })}
-              disabled={!speech.enabled}
-              aria-label="Testar voz"
-              title={speech.enabled ? "Testar voz" : "Leitura desligada"}
-            >
-              <Volume2 size={16} aria-hidden="true" />
-            </button>
-          </div>
+      <div id="voice-settings-panel" className="voice-settings-panel" hidden={!open}>
+        <div className="voice-settings-copy">
+          <label htmlFor="voice-select">Voz de leitura</label>
+          <span title={selectedVoiceName}>{selectedVoiceName}</span>
         </div>
-      ) : null}
+        <div className="voice-settings-controls">
+          <select
+            id="voice-select"
+            value={speech.selectedVoiceURI}
+            onChange={(event) => speech.setSelectedVoiceURI(event.target.value)}
+            aria-label="Escolher voz de leitura"
+          >
+            {speech.availableVoices.map((voice) => (
+              <option key={voice.voiceURI} value={voice.voiceURI}>
+                {speech.voiceOptionLabel(voice)}
+              </option>
+            ))}
+          </select>
+          <button
+            className="voice-test-button"
+            type="button"
+            onClick={() => speech.speak("Olá. Vamos treinar judo com Ô soto gari.", { id: "voice-test" })}
+            disabled={!speech.enabled}
+            aria-label="Testar voz"
+            title={speech.enabled ? "Testar voz" : "Leitura desligada"}
+          >
+            <Volume2 size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
     </>
   );
 }
