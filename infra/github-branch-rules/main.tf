@@ -53,7 +53,7 @@ resource "github_branch_protection" "dev" {
   allows_deletions                = false
   allows_force_pushes             = false
   require_signed_commits          = false
-  required_linear_history         = true
+  required_linear_history         = false
   require_conversation_resolution = true
 
   required_status_checks {

@@ -4,6 +4,29 @@ All notable changes to Digital Sensei are documented here.
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-06-06
+
+### Added
+
+- `Glossário` mode with grouped cards for all manual technique and movement entries.
+- Tighter child-first technique summaries grounded in official federation references where available.
+- Per-technique read buttons in the glossary, reusing the existing speech sequence control.
+- Render free-plan deployment configuration through `render.yaml`.
+- Terraform-managed GitHub branch rules for `master` and `dev`.
+
+### Changed
+
+- Technique illustrations now use distinct pose keys for all manual technique and movement entries.
+- Long mode tab labels now wrap at word boundaries instead of splitting final letters.
+- Docker frontend builds now use `npm ci` for reproducible installs.
+- CI and Terraform validation workflows now run on both `master` and `dev`.
+- `dev` branch protection allows merge commits so `dev` can be synced from `master` without force pushes.
+
+### Deployment
+
+- Render free deployment is documented as ephemeral for SQLite progress data because free Render services cannot attach persistent disks.
+- Branch-rule Terraform is limited to GitHub branch management; Render remains configured by `render.yaml`.
+
 ## [v0.3.0] - 2026-06-03
 
 ### Added

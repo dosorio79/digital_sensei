@@ -702,8 +702,19 @@ h1 {
   align-content: start;
 }
 
+.glossary-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.glossary-heading > div {
+  min-width: 0;
+}
+
 .glossary-copy h3 {
-  margin-bottom: 0;
+  margin: 8px 0 0;
   font-size: clamp(1.35rem, 3vw, 2rem);
 }
 
@@ -902,6 +913,10 @@ h1 {
 
   .feedback-actions > button {
     flex: 1;
+  }
+
+  .glossary-heading {
+    align-items: center;
   }
 }
 
