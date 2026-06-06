@@ -7,7 +7,8 @@ import {
   finishCurrentUtterance,
   getAudioContexts,
   getSpeechCancelCalls,
-  getSpeechUtterances
+  getSpeechUtterances,
+  installSpeechSynthesisMock
 } from "./test/audioMocks";
 
 const firstQuestion: PracticeQuestion = {
@@ -140,12 +141,12 @@ describe("App audio behavior", () => {
 
     await user.click(screen.getByRole("button", { name: "Ouvir pergunta e respostas" }));
 
-    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual([firstQuestion.prompt]);
+    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual(["Ô soto gari pertence a que grupo?"]);
 
     act(() => finishCurrentUtterance());
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Perna" })).toHaveClass("reading"));
-    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual([firstQuestion.prompt, "Perna"]);
+    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual(["Ô soto gari pertence a que grupo?", "Perna"]);
 
     act(() => finishCurrentUtterance());
 
@@ -159,7 +160,7 @@ describe("App audio behavior", () => {
     await user.click(screen.getByRole("button", { name: "Perna" }));
 
     expect(getAudioContexts()[0].notes.map((note) => note.frequency)).toEqual([523.25, 659.25]);
-    expect(getSpeechUtterances()[0].text).toContain("Boa! O soto gari pertence");
+    expect(getSpeechUtterances()[0].text).toContain("Boa! Ô soto gari pertence");
     expect(getSpeechUtterances()[0].text).toContain("Perna por fora. Varre por fora.");
     expect(screen.getByText("Resposta certa:")).toBeInTheDocument();
   });
@@ -206,17 +207,57 @@ describe("App audio behavior", () => {
 
     await user.click(await screen.findByRole("button", { name: "Glossário" }));
 
-    expect(await screen.findByRole("heading", { name: "Projeção" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Solo" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Projeção · Nage Waza" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Solo · Ne Waza" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "O soto gari" })).toBeInTheDocument();
+    expect(screen.getByText("Técnica de perna · Ashi Waza")).toBeInTheDocument();
+    expect(screen.getByText("Técnica de imobilização · Osae Waza")).toBeInTheDocument();
+    expect(screen.queryByText("Ashi Waza (Técnicas de perna) - O soto Gari")).not.toBeInTheDocument();
     expect(screen.getByText("O soto gari é uma técnica de perna com varrimento por fora e controlo.")).toBeInTheDocument();
     expect(screen.getByText("Perna por fora")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Ouvir O soto gari" }));
-    expect(getSpeechUtterances()[0].text).toBe("O soto gari");
+    expect(getSpeechUtterances()[0].text).toBe("Ô soto gari");
+    act(() => finishCurrentUtterance());
+    expect(getSpeechUtterances()[1].text).toBe("Técnica de perna · Áshi wazá");
     expect(screen.getByRole("link", { name: "Ver referência" })).toHaveAttribute(
       "href",
       "https://judo.ijf.org/techniques/O-soto-gari"
     );
     expect(screen.queryByRole("heading", { name: "Sensei" })).not.toBeInTheDocument();
+  });
+
+  it("opens compact voice settings to choose and test an available Portuguese voice", async () => {
+    installSpeechSynthesisMock({
+      voices: [
+        { lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" },
+        { lang: "pt-BR", name: "Portuguese Brazil", voiceURI: "pt-BR" }
+      ]
+    });
+    const user = userEvent.setup();
+    await renderQuiz();
+
+    const voiceButton = screen.getByRole("button", { name: "Voz" });
+    expect(voiceButton).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByLabelText("Escolher voz de leitura")).not.toBeVisible();
+
+    await user.click(voiceButton);
+
+    expect(voiceButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Voz de leitura")).toBeInTheDocument();
+    expect(screen.getAllByText("Portuguese Portugal (pt-PT)").length).toBeGreaterThan(0);
+    await user.selectOptions(screen.getByLabelText("Escolher voz de leitura"), "pt-BR");
+    await user.click(screen.getByRole("button", { name: "Testar voz" }));
+
+    expect(localStorage.getItem("ds_speech_voice_uri")).toBe("pt-BR");
+    expect(getSpeechUtterances()[0].voice?.voiceURI).toBe("pt-BR");
+    expect(getSpeechUtterances()[0].text).toBe("Olá. Vamos treinar judo com Ô soto gari.");
+
+    await user.click(screen.getByRole("button", { name: "Palavras japonesas" }));
+    expect(screen.queryByText("Voz de leitura")).not.toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Voz" }));
+    expect(screen.getByText("Voz de leitura")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Criança" }));
+    expect(screen.queryByText("Voz de leitura")).not.toBeVisible();
   });
 });

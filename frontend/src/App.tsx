@@ -57,8 +57,33 @@ const CATEGORY_LABELS: Record<Category, string> = {
   viradas: "Virada"
 };
 
+const GLOSSARY_GROUP_LABELS: Partial<Record<Category, string>> = {
+  nage_waza: "Projeção · Nage Waza",
+  ne_waza: "Solo · Ne Waza",
+  sequencias: "Sequências e contra-ataques · Ren Raku / Kaeshi Waza",
+  viradas: "Viradas · Ne Waza"
+};
+
+const GLOSSARY_FAMILY_LABELS: Record<string, string> = {
+  "Técnica de perna": "Técnica de perna · Ashi Waza",
+  "Técnica de braço": "Técnica de braço · Te Waza",
+  "Técnica de quadril": "Técnica de quadril · Koshi Waza",
+  "Técnica de imobilização": "Técnica de imobilização · Osae Waza",
+  "Sequência de golpes": "Sequência de golpes · Ren Raku Waza",
+  "Contra-ataque": "Contra-ataque · Kaeshi Waza",
+  "Viradas com uke em decúbito ventral": "Viradas com uke em decúbito ventral"
+};
+
 function categoryClass(category: Category): string {
   return `tag ${category}`;
+}
+
+function glossaryGroupLabel(category: Category): string {
+  return GLOSSARY_GROUP_LABELS[category] ?? CATEGORY_LABELS[category];
+}
+
+function glossaryFamilyLabel(item: ContentItem): string {
+  return GLOSSARY_FAMILY_LABELS[item.portuguese] ?? item.portuguese;
 }
 
 function questionTag(question: PracticeQuestion, selected: string | null): { label: string; className: string } {
@@ -100,6 +125,7 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
+  const [voiceSettingsOpen, setVoiceSettingsOpen] = useState(false);
   const speech = useSpeech();
   const soundEffects = useSoundEffects();
 
@@ -108,11 +134,13 @@ export function App() {
 
   function switchMode(next: Mode) {
     speech.stop();
+    setVoiceSettingsOpen(false);
     setMode(next);
   }
 
   function switchUser(next: UserId) {
     speech.stop();
+    setVoiceSettingsOpen(false);
     localStorage.setItem("ds_user", next);
     setUserId(next);
     setSessionKey((value) => value + 1);
@@ -252,6 +280,11 @@ export function App() {
                 label={soundEffects.enabled ? "Desligar som de acerto" : "Ligar som de acerto"}
                 enabledText="Acerto"
                 disabledText="Acerto"
+              />
+              <VoiceControls
+                speech={speech}
+                open={voiceSettingsOpen}
+                onToggle={() => setVoiceSettingsOpen((value) => !value)}
               />
             </div>
             <div className="user-switcher">
@@ -491,6 +524,65 @@ function AudioToggle({
       <Icon size={16} aria-hidden="true" />
       <span>{enabled ? enabledText : disabledText}</span>
     </button>
+  );
+}
+
+function VoiceControls({
+  speech,
+  open,
+  onToggle
+}: {
+  speech: SpeechControls;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  if (!speech.supported || !speech.voicesReady || speech.availableVoices.length === 0) return null;
+  const selectedVoiceName = speech.selectedVoice ? speech.voiceOptionLabel(speech.selectedVoice) : "Voz automática";
+
+  return (
+    <>
+      <button
+        className={open ? "voice-settings-toggle active" : "voice-settings-toggle"}
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls="voice-settings-panel"
+        title={open ? "Fechar definições de voz" : "Abrir definições de voz"}
+      >
+        <Volume2 size={16} aria-hidden="true" />
+        <span>Voz</span>
+      </button>
+      <div id="voice-settings-panel" className="voice-settings-panel" hidden={!open}>
+        <div className="voice-settings-copy">
+          <label htmlFor="voice-select">Voz de leitura</label>
+          <span title={selectedVoiceName}>{selectedVoiceName}</span>
+        </div>
+        <div className="voice-settings-controls">
+          <select
+            id="voice-select"
+            value={speech.selectedVoiceURI}
+            onChange={(event) => speech.setSelectedVoiceURI(event.target.value)}
+            aria-label="Escolher voz de leitura"
+          >
+            {speech.availableVoices.map((voice) => (
+              <option key={voice.voiceURI} value={voice.voiceURI}>
+                {speech.voiceOptionLabel(voice)}
+              </option>
+            ))}
+          </select>
+          <button
+            className="voice-test-button"
+            type="button"
+            onClick={() => speech.speak("Olá. Vamos treinar judo com Ô soto gari.", { id: "voice-test" })}
+            disabled={!speech.enabled}
+            aria-label="Testar voz"
+            title={speech.enabled ? "Testar voz" : "Leitura desligada"}
+          >
+            <Volume2 size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -886,46 +978,48 @@ function GlossaryView({
 
         return (
           <section key={category} className="glossary-group" aria-labelledby={`glossary-${category}`}>
-            <h2 id={`glossary-${category}`}>{CATEGORY_LABELS[category]}</h2>
+            <h2 id={`glossary-${category}`}>{glossaryGroupLabel(category)}</h2>
             <div className="glossary-grid">
-              {items.map((item) => (
-                <article key={item.id} className="glossary-card">
-                  <div className="glossary-copy">
-                    <div className="glossary-heading">
-                      <div>
-                        <span className={categoryClass(item.category)}>{item.portuguese}</span>
-                        <h3>{item.japanese}</h3>
+              {items.map((item) => {
+                const familyLabel = glossaryFamilyLabel(item);
+                return (
+                  <article key={item.id} className="glossary-card">
+                    <div className="glossary-copy">
+                      <div className="glossary-heading">
+                        <div>
+                          <span className={categoryClass(item.category)}>{familyLabel}</span>
+                          <h3>{item.japanese}</h3>
+                        </div>
+                        <SequenceListenButton
+                          speech={speech}
+                          items={[
+                            { id: `glossary-${item.id}-name`, text: item.japanese },
+                            { id: `glossary-${item.id}-family`, text: familyLabel },
+                            { id: `glossary-${item.id}-summary`, text: item.child_explanation },
+                            ...(item.visual_cue ? [{ id: `glossary-${item.id}-cue`, text: visualCueSpeechText(item.visual_cue) }] : [])
+                          ]}
+                          label={`Ouvir ${item.japanese}`}
+                        />
                       </div>
-                      <SequenceListenButton
-                        speech={speech}
-                        items={[
-                          { id: `glossary-${item.id}-name`, text: item.japanese },
-                          { id: `glossary-${item.id}-manual`, text: item.manual_text },
-                          { id: `glossary-${item.id}-summary`, text: item.child_explanation },
-                          ...(item.visual_cue ? [{ id: `glossary-${item.id}-cue`, text: visualCueSpeechText(item.visual_cue) }] : [])
-                        ]}
-                        label={`Ouvir ${item.japanese}`}
-                      />
+                      <p>{item.child_explanation}</p>
+                      {item.media_sources.length ? (
+                        <a
+                          className="reference-link"
+                          href={item.media_sources[0].url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <PlayCircle size={20} aria-hidden="true" />
+                          Ver referência
+                        </a>
+                      ) : null}
                     </div>
-                    <p className="manual-line">{item.manual_text}</p>
-                    <p>{item.child_explanation}</p>
-                    {item.media_sources.length ? (
-                      <a
-                        className="reference-link"
-                        href={item.media_sources[0].url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <PlayCircle size={20} aria-hidden="true" />
-                        Ver referência
-                      </a>
+                    {item.visual_cue ? (
+                      <VisualCueCard cue={item.visual_cue} category={item.category} />
                     ) : null}
-                  </div>
-                  {item.visual_cue ? (
-                    <VisualCueCard cue={item.visual_cue} category={item.category} />
-                  ) : null}
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </section>
         );
