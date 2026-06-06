@@ -207,16 +207,18 @@ describe("App audio behavior", () => {
 
     await user.click(await screen.findByRole("button", { name: "Glossário" }));
 
-    expect(await screen.findByRole("heading", { name: "Projeção" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Solo" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Projeção · Nage Waza" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Solo · Ne Waza" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "O soto gari" })).toBeInTheDocument();
+    expect(screen.getByText("Técnica de perna · Ashi Waza")).toBeInTheDocument();
+    expect(screen.getByText("Técnica de imobilização · Osae Waza")).toBeInTheDocument();
     expect(screen.queryByText("Ashi Waza (Técnicas de perna) - O soto Gari")).not.toBeInTheDocument();
     expect(screen.getByText("O soto gari é uma técnica de perna com varrimento por fora e controlo.")).toBeInTheDocument();
     expect(screen.getByText("Perna por fora")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Ouvir O soto gari" }));
     expect(getSpeechUtterances()[0].text).toBe("Ô soto gari");
     act(() => finishCurrentUtterance());
-    expect(getSpeechUtterances()[1].text).toBe("Técnica de perna");
+    expect(getSpeechUtterances()[1].text).toBe("Técnica de perna · Áshi wazá");
     expect(screen.getByRole("link", { name: "Ver referência" })).toHaveAttribute(
       "href",
       "https://judo.ijf.org/techniques/O-soto-gari"
