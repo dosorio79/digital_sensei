@@ -6,6 +6,7 @@ type UseSpeechOptions = {
   pitch?: number;
   volume?: number;
   storageKey?: string;
+  voiceStorageKey?: string;
 };
 
 type SpeakOptions = {
@@ -25,14 +26,79 @@ function storedEnabled(storageKey: string): boolean {
   return localStorage.getItem(storageKey) !== "false";
 }
 
-function chooseVoice(voices: SpeechSynthesisVoice[], lang: string): SpeechSynthesisVoice | null {
-  const exact = voices.find((voice) => voice.lang.toLowerCase() === lang.toLowerCase());
-  if (exact) return exact;
+function voiceRank(voice: SpeechSynthesisVoice, lang: string): number {
+  const voiceLang = voice.lang.toLowerCase();
+  const targetLang = lang.toLowerCase();
+  const languagePrefix = targetLang.split("-")[0] ?? "";
+  const name = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+  let score = 0;
+
+  if (voiceLang === targetLang) score += 100;
+  else if (languagePrefix && voiceLang.startsWith(`${languagePrefix}-`)) score += 60;
+  else if (voice.default) score += 10;
+
+  if (name.includes("natural")) score += 18;
+  if (name.includes("microsoft")) score += 14;
+  if (name.includes("apple")) score += 12;
+  if (name.includes("google")) score += 10;
+  if (voice.localService) score += 4;
+  if (voice.default) score += 3;
+
+  return score;
+}
+
+function sortVoices(voices: SpeechSynthesisVoice[], lang: string): SpeechSynthesisVoice[] {
+  return [...voices].sort((left, right) => {
+    const scoreDiff = voiceRank(right, lang) - voiceRank(left, lang);
+    if (scoreDiff !== 0) return scoreDiff;
+    return left.name.localeCompare(right.name, "pt");
+  });
+}
+
+function chooseVoice(voices: SpeechSynthesisVoice[], lang: string, selectedVoiceURI: string | null): SpeechSynthesisVoice | null {
+  const storedVoice = selectedVoiceURI ? voices.find((voice) => voice.voiceURI === selectedVoiceURI) : null;
+  if (storedVoice) return storedVoice;
+
+  const rankedVoices = sortVoices(voices, lang);
+  const rankedMatch = rankedVoices.find((voice) => voiceRank(voice, lang) >= 60);
+  if (rankedMatch) return rankedMatch;
 
   const languagePrefix = lang.split("-")[0]?.toLowerCase();
-  if (!languagePrefix) return null;
+  if (!languagePrefix) return rankedVoices[0] ?? null;
 
-  return voices.find((voice) => voice.lang.toLowerCase().startsWith(`${languagePrefix}-`)) ?? null;
+  return rankedVoices.find((voice) => voice.lang.toLowerCase().startsWith(`${languagePrefix}-`)) ?? rankedVoices[0] ?? null;
+}
+
+function voiceOptionLabel(voice: SpeechSynthesisVoice): string {
+  return `${voice.name} (${voice.lang})`;
+}
+
+const SPEECH_REPLACEMENTS: Array<[RegExp, string]> = [
+  [/\bO[-\s]soto[-\s]gari\b/gi, "Ô soto gari"],
+  [/\bO[-\s]uchi[-\s]gari\b/gi, "Ô uchi gari"],
+  [/\bSasae[-\s]tsurikomi[-\s]ashi\b/gi, "Sassaê tsurikomi ashi"],
+  [/\bKo[-\s]soto[-\s]gari\b/gi, "Kô soto gari"],
+  [/\bKo[-\s]uchi[-\s]gari\b/gi, "Kô uchi gari"],
+  [/\bMorote[-\s]seoi[-\s]nage\b/gi, "Morotê seoi naguê"],
+  [/\bSeoi[-\s]nage\b/gi, "Seoi naguê"],
+  [/\bKesa[-\s]gatame\b/gi, "Kêssa gatamê"],
+  [/\bKami[-\s]shiho[-\s]gatame\b/gi, "Kami shiho gatamê"],
+  [/\bYoko[-\s]shiho[-\s]gatame\b/gi, "Yoko shiho gatamê"],
+  [/\bUke\b/g, "ukê"],
+  [/\bTori\b/g, "tóri"],
+  [/\bNage[-\s]waza\b/gi, "Naguê wazá"],
+  [/\bNe[-\s]waza\b/gi, "Nê wazá"],
+  [/\bAshi[-\s]waza\b/gi, "Áshi wazá"],
+  [/\bOsae[-\s]waza\b/gi, "Ossaê wazá"],
+  [/\bRen[-\s]raku[-\s]waza\b/gi, "Ren raku wazá"],
+  [/\bKaeshi[-\s]waza\b/gi, "Kaeshi wazá"]
+];
+
+export function normalizeSpeechText(text: string): string {
+  return SPEECH_REPLACEMENTS.reduce((current, [pattern, replacement]) => current.replace(pattern, replacement), text)
+    .replace(/([A-Za-zÀ-ÿ])[-‐‑‒–—]([A-Za-zÀ-ÿ])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function useSpeech({
@@ -40,15 +106,18 @@ export function useSpeech({
   rate = 0.78,
   pitch = 1.05,
   volume = 1,
-  storageKey = "ds_speech_enabled"
+  storageKey = "ds_speech_enabled",
+  voiceStorageKey = "ds_speech_voice_uri"
 }: UseSpeechOptions = {}) {
   const supported = hasSpeechSynthesis();
   const [enabled, setEnabledState] = useState(() => storedEnabled(storageKey));
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceURI, setSelectedVoiceURIState] = useState(() => localStorage.getItem(voiceStorageKey));
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const speechRunRef = useRef(0);
 
-  const selectedVoice = useMemo(() => chooseVoice(voices, lang), [lang, voices]);
+  const availableVoices = useMemo(() => sortVoices(voices, lang).filter((voice) => voiceRank(voice, lang) >= 60), [lang, voices]);
+  const selectedVoice = useMemo(() => chooseVoice(voices, lang, selectedVoiceURI), [lang, selectedVoiceURI, voices]);
 
   useEffect(() => {
     if (!supported) return;
@@ -83,9 +152,19 @@ export function useSpeech({
     setEnabledState(next);
   }, []);
 
+  const setSelectedVoiceURI = useCallback(
+    (voiceURI: string) => {
+      const next = voiceURI || null;
+      setSelectedVoiceURIState(next);
+      if (next) localStorage.setItem(voiceStorageKey, next);
+      else localStorage.removeItem(voiceStorageKey);
+    },
+    [voiceStorageKey]
+  );
+
   const speak = useCallback(
     (text: string, options: SpeakOptions = {}) => {
-      const trimmed = text.trim();
+      const trimmed = normalizeSpeechText(text);
       if (!supported || !enabled || !trimmed) return;
 
       const runId = speechRunRef.current + 1;
@@ -116,7 +195,7 @@ export function useSpeech({
   const speakSequence = useCallback(
     (items: SpeechItem[]) => {
       const readableItems = items
-        .map((item) => ({ ...item, text: item.text.trim() }))
+        .map((item) => ({ ...item, text: normalizeSpeechText(item.text) }))
         .filter((item) => item.text);
 
       if (!supported || !enabled || readableItems.length === 0) return;
@@ -165,7 +244,11 @@ export function useSpeech({
     enabled,
     setEnabled,
     voicesReady: voices.length > 0,
+    availableVoices,
     selectedVoice,
+    selectedVoiceURI: selectedVoice?.voiceURI ?? selectedVoiceURI ?? "",
+    setSelectedVoiceURI,
+    voiceOptionLabel,
     speak,
     speakSequence,
     stop,

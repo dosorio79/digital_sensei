@@ -7,7 +7,7 @@ import {
   installSpeechSynthesisMock,
   removeSpeechSynthesisMock
 } from "./test/audioMocks";
-import { useSpeech } from "./useSpeech";
+import { normalizeSpeechText, useSpeech } from "./useSpeech";
 
 describe("useSpeech", () => {
   it("reports unavailable when speech synthesis is missing", () => {
@@ -31,7 +31,9 @@ describe("useSpeech", () => {
     installSpeechSynthesisMock({
       voices: [
         { lang: "en-US", name: "English" },
-        { lang: "pt-PT", name: "Portuguese Portugal" }
+        { lang: "pt-BR", name: "Portuguese Brazil", voiceURI: "pt-BR" },
+        { lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" },
+        { lang: "pt-PT", name: "Microsoft Helia Natural", voiceURI: "helia-natural" }
       ]
     });
     const { result } = renderHook(() => useSpeech());
@@ -45,8 +47,41 @@ describe("useSpeech", () => {
     expect(utterance.rate).toBe(0.78);
     expect(utterance.pitch).toBe(1.05);
     expect(utterance.volume).toBe(1);
-    expect(utterance.voice?.name).toBe("Portuguese Portugal");
+    expect(utterance.voice?.name).toBe("Microsoft Helia Natural");
     expect(getSpeechCancelCalls()).toBe(1);
+  });
+
+  it("persists a selected voice and uses it for sequences", async () => {
+    installSpeechSynthesisMock({
+      voices: [
+        { lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" },
+        { lang: "pt-BR", name: "Portuguese Brazil", voiceURI: "pt-BR" }
+      ]
+    });
+    const { result } = renderHook(() => useSpeech());
+
+    await waitFor(() => expect(result.current.availableVoices).toHaveLength(2));
+    act(() => result.current.setSelectedVoiceURI("pt-BR"));
+    act(() => result.current.speakSequence([{ id: "hello", text: "Olá" }]));
+
+    expect(localStorage.getItem("ds_speech_voice_uri")).toBe("pt-BR");
+    expect(result.current.selectedVoice?.name).toBe("Portuguese Brazil");
+    expect(getSpeechUtterances()[0].voice?.voiceURI).toBe("pt-BR");
+  });
+
+  it("falls back when the stored voice is missing", async () => {
+    localStorage.setItem("ds_speech_voice_uri", "missing-voice");
+    installSpeechSynthesisMock({
+      voices: [{ lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" }]
+    });
+    const { result } = renderHook(() => useSpeech());
+
+    await waitFor(() => expect(result.current.selectedVoice?.voiceURI).toBe("basic-pt-PT"));
+  });
+
+  it("normalizes judo text for speech without requiring stored audio", () => {
+    expect(normalizeSpeechText("O-soto-gari pertence a Ashi Waza.")).toBe("Ô soto gari pertence a Áshi wazá.");
+    expect(normalizeSpeechText("Kesa Gatame")).toBe("Kêssa gatamê");
   });
 
   it("cancels existing speech before starting a new utterance", () => {
