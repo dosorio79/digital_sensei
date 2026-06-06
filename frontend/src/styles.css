@@ -135,6 +135,51 @@ button {
   opacity: 0.5;
 }
 
+.voice-controls {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 5px 4px 8px;
+  border: 2px solid rgba(36, 53, 46, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.86);
+  box-shadow: 0 4px 0 rgba(36, 53, 46, 0.08);
+}
+
+.voice-controls label {
+  color: #26322d;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.voice-controls select {
+  max-width: min(250px, 38vw);
+  border: 0;
+  background: transparent;
+  color: #26322d;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.voice-test-button {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: #fff9d8;
+  color: #8a3a04;
+  cursor: pointer;
+}
+
+.voice-test-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: #8a3a04;
@@ -267,6 +312,8 @@ h1 {
 .mode-tabs button:focus-visible,
 .answer-button:focus-visible,
 .audio-toggle:focus-visible,
+.voice-controls select:focus-visible,
+.voice-test-button:focus-visible,
 .sequence-listen-button:focus-visible,
 .primary-action:focus-visible,
 .feedback button:focus-visible {
@@ -874,9 +921,14 @@ h1 {
   .manual-pill,
   .topbar-controls,
   .audio-controls,
+  .voice-controls,
   .user-switcher {
     width: 100%;
     justify-content: center;
+  }
+
+  .voice-controls select {
+    max-width: min(100%, 260px);
   }
 
   .topbar-controls {

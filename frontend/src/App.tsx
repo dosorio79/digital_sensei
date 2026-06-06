@@ -253,6 +253,7 @@ export function App() {
                 enabledText="Acerto"
                 disabledText="Acerto"
               />
+              <VoiceControls speech={speech} />
             </div>
             <div className="user-switcher">
               <UserRound size={16} aria-hidden="true" />
@@ -491,6 +492,38 @@ function AudioToggle({
       <Icon size={16} aria-hidden="true" />
       <span>{enabled ? enabledText : disabledText}</span>
     </button>
+  );
+}
+
+function VoiceControls({ speech }: { speech: SpeechControls }) {
+  if (!speech.supported || !speech.voicesReady || speech.availableVoices.length === 0) return null;
+
+  return (
+    <div className="voice-controls">
+      <label htmlFor="voice-select">Voz</label>
+      <select
+        id="voice-select"
+        value={speech.selectedVoiceURI}
+        onChange={(event) => speech.setSelectedVoiceURI(event.target.value)}
+        aria-label="Escolher voz de leitura"
+      >
+        {speech.availableVoices.map((voice) => (
+          <option key={voice.voiceURI} value={voice.voiceURI}>
+            {speech.voiceOptionLabel(voice)}
+          </option>
+        ))}
+      </select>
+      <button
+        className="voice-test-button"
+        type="button"
+        onClick={() => speech.speak("Olá. Vamos treinar judo com O soto gari.", { id: "voice-test" })}
+        disabled={!speech.enabled}
+        aria-label="Testar voz"
+        title={speech.enabled ? "Testar voz" : "Leitura desligada"}
+      >
+        <Volume2 size={16} aria-hidden="true" />
+      </button>
+    </div>
   );
 }
 

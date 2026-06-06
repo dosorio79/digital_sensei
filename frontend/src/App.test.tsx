@@ -7,7 +7,8 @@ import {
   finishCurrentUtterance,
   getAudioContexts,
   getSpeechCancelCalls,
-  getSpeechUtterances
+  getSpeechUtterances,
+  installSpeechSynthesisMock
 } from "./test/audioMocks";
 
 const firstQuestion: PracticeQuestion = {
@@ -140,12 +141,12 @@ describe("App audio behavior", () => {
 
     await user.click(screen.getByRole("button", { name: "Ouvir pergunta e respostas" }));
 
-    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual([firstQuestion.prompt]);
+    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual(["Ô soto gari pertence a que grupo?"]);
 
     act(() => finishCurrentUtterance());
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Perna" })).toHaveClass("reading"));
-    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual([firstQuestion.prompt, "Perna"]);
+    expect(getSpeechUtterances().map((utterance) => utterance.text)).toEqual(["Ô soto gari pertence a que grupo?", "Perna"]);
 
     act(() => finishCurrentUtterance());
 
@@ -159,7 +160,7 @@ describe("App audio behavior", () => {
     await user.click(screen.getByRole("button", { name: "Perna" }));
 
     expect(getAudioContexts()[0].notes.map((note) => note.frequency)).toEqual([523.25, 659.25]);
-    expect(getSpeechUtterances()[0].text).toContain("Boa! O soto gari pertence");
+    expect(getSpeechUtterances()[0].text).toContain("Boa! Ô soto gari pertence");
     expect(getSpeechUtterances()[0].text).toContain("Perna por fora. Varre por fora.");
     expect(screen.getByText("Resposta certa:")).toBeInTheDocument();
   });
@@ -212,11 +213,29 @@ describe("App audio behavior", () => {
     expect(screen.getByText("O soto gari é uma técnica de perna com varrimento por fora e controlo.")).toBeInTheDocument();
     expect(screen.getByText("Perna por fora")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Ouvir O soto gari" }));
-    expect(getSpeechUtterances()[0].text).toBe("O soto gari");
+    expect(getSpeechUtterances()[0].text).toBe("Ô soto gari");
     expect(screen.getByRole("link", { name: "Ver referência" })).toHaveAttribute(
       "href",
       "https://judo.ijf.org/techniques/O-soto-gari"
     );
     expect(screen.queryByRole("heading", { name: "Sensei" })).not.toBeInTheDocument();
+  });
+
+  it("lets the learner choose and test an available Portuguese voice", async () => {
+    installSpeechSynthesisMock({
+      voices: [
+        { lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" },
+        { lang: "pt-BR", name: "Portuguese Brazil", voiceURI: "pt-BR" }
+      ]
+    });
+    const user = userEvent.setup();
+    await renderQuiz();
+
+    await user.selectOptions(screen.getByLabelText("Escolher voz de leitura"), "pt-BR");
+    await user.click(screen.getByRole("button", { name: "Testar voz" }));
+
+    expect(localStorage.getItem("ds_speech_voice_uri")).toBe("pt-BR");
+    expect(getSpeechUtterances()[0].voice?.voiceURI).toBe("pt-BR");
+    expect(getSpeechUtterances()[0].text).toBe("Olá. Vamos treinar judo com Ô soto gari.");
   });
 });
