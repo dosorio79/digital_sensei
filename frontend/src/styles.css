@@ -771,11 +771,6 @@ h1 {
   font-weight: 800;
 }
 
-.glossary-copy .manual-line {
-  color: #8a3a04;
-  font-size: 0.92rem;
-}
-
 .demo-card {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
