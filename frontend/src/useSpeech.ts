@@ -38,6 +38,7 @@ function voiceRank(voice: SpeechSynthesisVoice, lang: string): number {
   else if (voice.default) score += 10;
 
   if (name.includes("natural")) score += 18;
+  if (name.includes("duarte")) score += 16;
   if (name.includes("microsoft")) score += 14;
   if (name.includes("apple")) score += 12;
   if (name.includes("google")) score += 10;
