@@ -12,6 +12,8 @@ Recommended references:
 
 Specific source URLs are stored per item in `content/manual_amarelo_laranja.json` under `media_sources`.
 
+Technique summaries in `child_explanation` may paraphrase official IJF technique descriptions when a direct IJF page exists. Keep these summaries short, original, child-friendly, and linked through `media_sources`; do not copy long official wording.
+
 The child-facing visual panels are original in-app cues stored under `visual_cue`. They are not copied from federation images. They are simple memory aids, not a substitute for a teacher demonstrating the technique.
 
 ## Policy

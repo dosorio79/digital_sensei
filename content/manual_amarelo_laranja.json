@@ -416,7 +416,7 @@
       "japanese": "O soto gari",
       "portuguese": "Técnica de perna",
       "manual_text": "Ashi Waza (Técnicas de perna) - O soto Gari",
-      "child_explanation": "O soto gari pertence às técnicas de perna, chamadas Ashi Waza.",
+      "child_explanation": "O soto gari é uma técnica de perna: tiras o equilíbrio para trás e a perna varre por fora, sempre com controlo.",
       "quiz_prompts": [
         "O soto gari pertence a que grupo?"
       ],
@@ -450,7 +450,7 @@
       "japanese": "O uchi gari",
       "portuguese": "Técnica de perna",
       "manual_text": "Ashi Waza (Técnicas de perna) - O uchi gari",
-      "child_explanation": "O uchi gari é uma técnica de perna do grupo Ashi Waza.",
+      "child_explanation": "O uchi gari é uma técnica de perna: levas o equilíbrio para trás e varres por dentro com uma entrada perto e segura.",
       "quiz_prompts": [
         "O uchi gari é uma técnica de quê?"
       ],
@@ -484,7 +484,7 @@
       "japanese": "Sasae tsurikomi ashi",
       "portuguese": "Técnica de perna",
       "manual_text": "Ashi Waza (Técnicas de perna) - Sasae tsurikomi ashi",
-      "child_explanation": "Sasae tsurikomi ashi também fica nas técnicas de perna.",
+      "child_explanation": "Sasae tsurikomi ashi é uma técnica de perna: o pé faz de travão perto do tornozelo enquanto as mãos guiam a rotação.",
       "quiz_prompts": [
         "Sasae tsurikomi ashi pertence a que grupo?"
       ],
@@ -518,7 +518,7 @@
       "japanese": "Ippon Seoi Nage",
       "portuguese": "Técnica de braço",
       "manual_text": "Te Waza (Técnicas de braço) - Ippon Seoi Nage",
-      "child_explanation": "Ippon Seoi Nage pertence às técnicas de braço, chamadas Te Waza.",
+      "child_explanation": "Ippon Seoi Nage é uma técnica de braço: entras com o ombro, levas o equilíbrio para a frente e projetas com controlo.",
       "quiz_prompts": [
         "Ippon Seoi Nage pertence a que grupo?"
       ],
@@ -534,7 +534,7 @@
           "Braço bem controlado",
           "Joelhos fletidos"
         ],
-        "pose": "shoulder_throw"
+        "pose": "ippon_seoi"
       },
       "media_sources": [
         {
@@ -552,7 +552,7 @@
       "japanese": "Morote Seoi Nage",
       "portuguese": "Técnica de braço",
       "manual_text": "Te Waza (Técnicas de braço) - Morote Seoi Nage",
-      "child_explanation": "Morote Seoi Nage é uma técnica de braço.",
+      "child_explanation": "Morote Seoi Nage é da família Seoi Nage: as duas mãos guiam, o equilíbrio vem para a frente e o colega passa pelo ombro.",
       "quiz_prompts": [
         "Morote Seoi Nage é uma técnica de quê?"
       ],
@@ -568,7 +568,7 @@
           "Entra de costas",
           "Controla antes de projetar"
         ],
-        "pose": "shoulder_throw"
+        "pose": "morote_seoi"
       },
       "media_sources": [
         {
@@ -593,7 +593,7 @@
       "japanese": "O goshi",
       "portuguese": "Técnica de quadril",
       "manual_text": "Koshi Waza (Técnicas de quadril) - O goshi",
-      "child_explanation": "O goshi pertence às técnicas de quadril, chamadas Koshi Waza.",
+      "child_explanation": "O goshi é uma técnica de quadril: chegas perto, usas o quadril como apoio e rodas para projetar com calma.",
       "quiz_prompts": [
         "O goshi pertence a que grupo?"
       ],
@@ -609,7 +609,7 @@
           "Quadril à frente",
           "Costas direitas"
         ],
-        "pose": "hip_throw"
+        "pose": "o_goshi"
       },
       "media_sources": [
         {
@@ -627,7 +627,7 @@
       "japanese": "Uki goshi",
       "portuguese": "Técnica de quadril",
       "manual_text": "Koshi Waza (Técnicas de quadril) - Uki goshi",
-      "child_explanation": "Uki goshi é uma técnica de quadril.",
+      "child_explanation": "Uki goshi é uma técnica de quadril: uma entrada leve do quadril ajuda a rodar o colega sem levantar demais.",
       "quiz_prompts": [
         "Uki goshi é uma técnica de quê?"
       ],
@@ -643,7 +643,7 @@
           "Quadril ajuda a virar",
           "Mãos acompanham"
         ],
-        "pose": "hip_throw"
+        "pose": "uki_goshi"
       },
       "media_sources": [
         {
@@ -661,7 +661,7 @@
       "japanese": "Kesa Gatame",
       "portuguese": "Técnica de imobilização",
       "manual_text": "Osae Waza (Técnicas de imobilização) - Kesa Gatame",
-      "child_explanation": "Kesa Gatame é uma técnica de imobilização no chão.",
+      "child_explanation": "Kesa Gatame é uma imobilização de solo: ficas de lado junto à cabeça do colega e controlas com o corpo estável.",
       "quiz_prompts": [
         "Kesa Gatame é uma técnica de quê?"
       ],
@@ -695,7 +695,7 @@
       "japanese": "Yoko Shiho Gatame",
       "portuguese": "Técnica de imobilização",
       "manual_text": "Osae Waza (Técnicas de imobilização) - Yoko Shiho Gatame",
-      "child_explanation": "Yoko Shiho Gatame fica no grupo Osae Waza, imobilizações.",
+      "child_explanation": "Yoko Shiho Gatame é uma imobilização de lado: o corpo prende o colega de costas, com controlo nos quatro pontos.",
       "quiz_prompts": [
         "Yoko Shiho Gatame pertence a que grupo?"
       ],
@@ -729,7 +729,7 @@
       "japanese": "Kami Shiho Gatame",
       "portuguese": "Técnica de imobilização",
       "manual_text": "Osae Waza (Técnicas de imobilização) - Kami Shiho Gatame",
-      "child_explanation": "Kami Shiho Gatame é uma imobilização de solo.",
+      "child_explanation": "Kami Shiho Gatame é uma imobilização por cima da cabeça: controlas os ombros e manténs o corpo estável.",
       "quiz_prompts": [
         "Kami Shiho Gatame é uma técnica de quê?"
       ],
@@ -763,7 +763,7 @@
       "japanese": "Tate Shiho Gatame",
       "portuguese": "Técnica de imobilização",
       "manual_text": "Osae Waza (Técnicas de imobilização) - Tate Shiho Gatame",
-      "child_explanation": "Tate Shiho Gatame também pertence às imobilizações.",
+      "child_explanation": "Tate Shiho Gatame é uma imobilização por cima: sentas-te de frente e usas o peito para controlar com calma.",
       "quiz_prompts": [
         "Tate Shiho Gatame pertence a que grupo?"
       ],
@@ -797,7 +797,7 @@
       "japanese": "Ren Raku Waza",
       "portuguese": "Sequência de golpes",
       "manual_text": "REN RAKU WAZA (Sequência de golpes) - Demonstrar 2",
-      "child_explanation": "Ren Raku Waza quer dizer fazer uma sequência de golpes.",
+      "child_explanation": "Ren Raku Waza quer dizer ligar técnicas: fazes uma ação e continuas para outra sem perder o controlo.",
       "quiz_prompts": [
         "O que quer dizer Ren Raku Waza?"
       ],
@@ -838,7 +838,7 @@
       "japanese": "Kaeshi Waza",
       "portuguese": "Contra-ataque",
       "manual_text": "KAESHI WAZA (Contra-ataque) - Demonstrar 1",
-      "child_explanation": "Kaeshi Waza é uma resposta ou contra-ataque.",
+      "child_explanation": "Kaeshi Waza é um contra-ataque: percebes a ação do colega, controlas primeiro e respondes com segurança.",
       "quiz_prompts": [
         "O que quer dizer Kaeshi Waza?"
       ],
@@ -879,7 +879,7 @@
       "japanese": "Viradas",
       "portuguese": "Viradas com uke em decúbito ventral",
       "manual_text": "Viradas quando o uke em decúbito ventral - Demonstrar 3",
-      "child_explanation": "Viradas são formas de trabalhar no chão quando o colega está de barriga para baixo.",
+      "child_explanation": "Viradas são formas de trabalhar no chão quando uke está de barriga para baixo, para virar e procurar controlo.",
       "quiz_prompts": [
         "As viradas acontecem quando o uke está como?"
       ],
