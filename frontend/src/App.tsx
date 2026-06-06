@@ -933,14 +933,13 @@ function GlossaryView({
                         speech={speech}
                         items={[
                           { id: `glossary-${item.id}-name`, text: item.japanese },
-                          { id: `glossary-${item.id}-manual`, text: item.manual_text },
+                          { id: `glossary-${item.id}-family`, text: item.portuguese },
                           { id: `glossary-${item.id}-summary`, text: item.child_explanation },
                           ...(item.visual_cue ? [{ id: `glossary-${item.id}-cue`, text: visualCueSpeechText(item.visual_cue) }] : [])
                         ]}
                         label={`Ouvir ${item.japanese}`}
                       />
                     </div>
-                    <p className="manual-line">{item.manual_text}</p>
                     <p>{item.child_explanation}</p>
                     {item.media_sources.length ? (
                       <a
