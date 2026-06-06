@@ -301,7 +301,7 @@ export function App() {
         ) : mode === "demos" ? (
           <DemosView loading={loading} catalog={catalog} />
         ) : mode === "glossario" ? (
-          <GlossaryView loading={loading} catalog={catalog} />
+          <GlossaryView loading={loading} catalog={catalog} speech={speech} />
         ) : (
           <QuizView
             loading={loading}
@@ -862,10 +862,12 @@ function DemosView({
 
 function GlossaryView({
   loading,
-  catalog
+  catalog,
+  speech
 }: {
   loading: boolean;
   catalog: ContentCatalog | null;
+  speech: SpeechControls;
 }) {
   if (loading) {
     return <div className="center-state">A preparar o glossário...</div>;
@@ -889,8 +891,22 @@ function GlossaryView({
               {items.map((item) => (
                 <article key={item.id} className="glossary-card">
                   <div className="glossary-copy">
-                    <span className={categoryClass(item.category)}>{item.portuguese}</span>
-                    <h3>{item.japanese}</h3>
+                    <div className="glossary-heading">
+                      <div>
+                        <span className={categoryClass(item.category)}>{item.portuguese}</span>
+                        <h3>{item.japanese}</h3>
+                      </div>
+                      <SequenceListenButton
+                        speech={speech}
+                        items={[
+                          { id: `glossary-${item.id}-name`, text: item.japanese },
+                          { id: `glossary-${item.id}-manual`, text: item.manual_text },
+                          { id: `glossary-${item.id}-summary`, text: item.child_explanation },
+                          ...(item.visual_cue ? [{ id: `glossary-${item.id}-cue`, text: visualCueSpeechText(item.visual_cue) }] : [])
+                        ]}
+                        label={`Ouvir ${item.japanese}`}
+                      />
+                    </div>
                     <p className="manual-line">{item.manual_text}</p>
                     <p>{item.child_explanation}</p>
                     {item.media_sources.length ? (

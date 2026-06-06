@@ -211,6 +211,8 @@ describe("App audio behavior", () => {
     expect(screen.getByRole("heading", { name: "O soto gari" })).toBeInTheDocument();
     expect(screen.getByText("O soto gari é uma técnica de perna com varrimento por fora e controlo.")).toBeInTheDocument();
     expect(screen.getByText("Perna por fora")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Ouvir O soto gari" }));
+    expect(getSpeechUtterances()[0].text).toBe("O soto gari");
     expect(screen.getByRole("link", { name: "Ver referência" })).toHaveAttribute(
       "href",
       "https://judo.ijf.org/techniques/O-soto-gari"
