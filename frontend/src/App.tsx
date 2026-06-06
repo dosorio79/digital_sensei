@@ -57,8 +57,33 @@ const CATEGORY_LABELS: Record<Category, string> = {
   viradas: "Virada"
 };
 
+const GLOSSARY_GROUP_LABELS: Partial<Record<Category, string>> = {
+  nage_waza: "Projeção · Nage Waza",
+  ne_waza: "Solo · Ne Waza",
+  sequencias: "Sequências e contra-ataques · Ren Raku / Kaeshi Waza",
+  viradas: "Viradas · Ne Waza"
+};
+
+const GLOSSARY_FAMILY_LABELS: Record<string, string> = {
+  "Técnica de perna": "Técnica de perna · Ashi Waza",
+  "Técnica de braço": "Técnica de braço · Te Waza",
+  "Técnica de quadril": "Técnica de quadril · Koshi Waza",
+  "Técnica de imobilização": "Técnica de imobilização · Osae Waza",
+  "Sequência de golpes": "Sequência de golpes · Ren Raku Waza",
+  "Contra-ataque": "Contra-ataque · Kaeshi Waza",
+  "Viradas com uke em decúbito ventral": "Viradas com uke em decúbito ventral"
+};
+
 function categoryClass(category: Category): string {
   return `tag ${category}`;
+}
+
+function glossaryGroupLabel(category: Category): string {
+  return GLOSSARY_GROUP_LABELS[category] ?? CATEGORY_LABELS[category];
+}
+
+function glossaryFamilyLabel(item: ContentItem): string {
+  return GLOSSARY_FAMILY_LABELS[item.portuguese] ?? item.portuguese;
 }
 
 function questionTag(question: PracticeQuestion, selected: string | null): { label: string; className: string } {
@@ -919,45 +944,48 @@ function GlossaryView({
 
         return (
           <section key={category} className="glossary-group" aria-labelledby={`glossary-${category}`}>
-            <h2 id={`glossary-${category}`}>{CATEGORY_LABELS[category]}</h2>
+            <h2 id={`glossary-${category}`}>{glossaryGroupLabel(category)}</h2>
             <div className="glossary-grid">
-              {items.map((item) => (
-                <article key={item.id} className="glossary-card">
-                  <div className="glossary-copy">
-                    <div className="glossary-heading">
-                      <div>
-                        <span className={categoryClass(item.category)}>{item.portuguese}</span>
-                        <h3>{item.japanese}</h3>
+              {items.map((item) => {
+                const familyLabel = glossaryFamilyLabel(item);
+                return (
+                  <article key={item.id} className="glossary-card">
+                    <div className="glossary-copy">
+                      <div className="glossary-heading">
+                        <div>
+                          <span className={categoryClass(item.category)}>{familyLabel}</span>
+                          <h3>{item.japanese}</h3>
+                        </div>
+                        <SequenceListenButton
+                          speech={speech}
+                          items={[
+                            { id: `glossary-${item.id}-name`, text: item.japanese },
+                            { id: `glossary-${item.id}-family`, text: familyLabel },
+                            { id: `glossary-${item.id}-summary`, text: item.child_explanation },
+                            ...(item.visual_cue ? [{ id: `glossary-${item.id}-cue`, text: visualCueSpeechText(item.visual_cue) }] : [])
+                          ]}
+                          label={`Ouvir ${item.japanese}`}
+                        />
                       </div>
-                      <SequenceListenButton
-                        speech={speech}
-                        items={[
-                          { id: `glossary-${item.id}-name`, text: item.japanese },
-                          { id: `glossary-${item.id}-family`, text: item.portuguese },
-                          { id: `glossary-${item.id}-summary`, text: item.child_explanation },
-                          ...(item.visual_cue ? [{ id: `glossary-${item.id}-cue`, text: visualCueSpeechText(item.visual_cue) }] : [])
-                        ]}
-                        label={`Ouvir ${item.japanese}`}
-                      />
+                      <p>{item.child_explanation}</p>
+                      {item.media_sources.length ? (
+                        <a
+                          className="reference-link"
+                          href={item.media_sources[0].url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <PlayCircle size={20} aria-hidden="true" />
+                          Ver referência
+                        </a>
+                      ) : null}
                     </div>
-                    <p>{item.child_explanation}</p>
-                    {item.media_sources.length ? (
-                      <a
-                        className="reference-link"
-                        href={item.media_sources[0].url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <PlayCircle size={20} aria-hidden="true" />
-                        Ver referência
-                      </a>
+                    {item.visual_cue ? (
+                      <VisualCueCard cue={item.visual_cue} category={item.category} />
                     ) : null}
-                  </div>
-                  {item.visual_cue ? (
-                    <VisualCueCard cue={item.visual_cue} category={item.category} />
-                  ) : null}
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </section>
         );
