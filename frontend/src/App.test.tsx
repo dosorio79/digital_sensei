@@ -226,7 +226,7 @@ describe("App audio behavior", () => {
     expect(screen.queryByRole("heading", { name: "Sensei" })).not.toBeInTheDocument();
   });
 
-  it("lets the learner choose and test an available Portuguese voice", async () => {
+  it("opens compact voice settings to choose and test an available Portuguese voice", async () => {
     installSpeechSynthesisMock({
       voices: [
         { lang: "pt-PT", name: "Portuguese Portugal", voiceURI: "basic-pt-PT" },
@@ -236,11 +236,28 @@ describe("App audio behavior", () => {
     const user = userEvent.setup();
     await renderQuiz();
 
+    const voiceButton = screen.getByRole("button", { name: "Voz" });
+    expect(voiceButton).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByLabelText("Escolher voz de leitura")).not.toBeVisible();
+
+    await user.click(voiceButton);
+
+    expect(voiceButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Voz de leitura")).toBeInTheDocument();
+    expect(screen.getAllByText("Portuguese Portugal (pt-PT)").length).toBeGreaterThan(0);
     await user.selectOptions(screen.getByLabelText("Escolher voz de leitura"), "pt-BR");
     await user.click(screen.getByRole("button", { name: "Testar voz" }));
 
     expect(localStorage.getItem("ds_speech_voice_uri")).toBe("pt-BR");
     expect(getSpeechUtterances()[0].voice?.voiceURI).toBe("pt-BR");
     expect(getSpeechUtterances()[0].text).toBe("Olá. Vamos treinar judo com Ô soto gari.");
+
+    await user.click(screen.getByRole("button", { name: "Palavras japonesas" }));
+    expect(screen.queryByText("Voz de leitura")).not.toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Voz" }));
+    expect(screen.getByText("Voz de leitura")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Criança" }));
+    expect(screen.queryByText("Voz de leitura")).not.toBeVisible();
   });
 });

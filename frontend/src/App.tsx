@@ -125,6 +125,7 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
+  const [voiceSettingsOpen, setVoiceSettingsOpen] = useState(false);
   const speech = useSpeech();
   const soundEffects = useSoundEffects();
 
@@ -133,11 +134,13 @@ export function App() {
 
   function switchMode(next: Mode) {
     speech.stop();
+    setVoiceSettingsOpen(false);
     setMode(next);
   }
 
   function switchUser(next: UserId) {
     speech.stop();
+    setVoiceSettingsOpen(false);
     localStorage.setItem("ds_user", next);
     setUserId(next);
     setSessionKey((value) => value + 1);
@@ -278,7 +281,11 @@ export function App() {
                 enabledText="Acerto"
                 disabledText="Acerto"
               />
-              <VoiceControls speech={speech} />
+              <VoiceControls
+                speech={speech}
+                open={voiceSettingsOpen}
+                onToggle={() => setVoiceSettingsOpen((value) => !value)}
+              />
             </div>
             <div className="user-switcher">
               <UserRound size={16} aria-hidden="true" />
@@ -520,35 +527,62 @@ function AudioToggle({
   );
 }
 
-function VoiceControls({ speech }: { speech: SpeechControls }) {
+function VoiceControls({
+  speech,
+  open,
+  onToggle
+}: {
+  speech: SpeechControls;
+  open: boolean;
+  onToggle: () => void;
+}) {
   if (!speech.supported || !speech.voicesReady || speech.availableVoices.length === 0) return null;
+  const selectedVoiceName = speech.selectedVoice ? speech.voiceOptionLabel(speech.selectedVoice) : "Voz automática";
 
   return (
-    <div className="voice-controls">
-      <label htmlFor="voice-select">Voz</label>
-      <select
-        id="voice-select"
-        value={speech.selectedVoiceURI}
-        onChange={(event) => speech.setSelectedVoiceURI(event.target.value)}
-        aria-label="Escolher voz de leitura"
-      >
-        {speech.availableVoices.map((voice) => (
-          <option key={voice.voiceURI} value={voice.voiceURI}>
-            {speech.voiceOptionLabel(voice)}
-          </option>
-        ))}
-      </select>
+    <>
       <button
-        className="voice-test-button"
+        className={open ? "voice-settings-toggle active" : "voice-settings-toggle"}
         type="button"
-        onClick={() => speech.speak("Olá. Vamos treinar judo com O soto gari.", { id: "voice-test" })}
-        disabled={!speech.enabled}
-        aria-label="Testar voz"
-        title={speech.enabled ? "Testar voz" : "Leitura desligada"}
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls="voice-settings-panel"
+        title={open ? "Fechar definições de voz" : "Abrir definições de voz"}
       >
         <Volume2 size={16} aria-hidden="true" />
+        <span>Voz</span>
       </button>
-    </div>
+      <div id="voice-settings-panel" className="voice-settings-panel" hidden={!open}>
+        <div className="voice-settings-copy">
+          <label htmlFor="voice-select">Voz de leitura</label>
+          <span title={selectedVoiceName}>{selectedVoiceName}</span>
+        </div>
+        <div className="voice-settings-controls">
+          <select
+            id="voice-select"
+            value={speech.selectedVoiceURI}
+            onChange={(event) => speech.setSelectedVoiceURI(event.target.value)}
+            aria-label="Escolher voz de leitura"
+          >
+            {speech.availableVoices.map((voice) => (
+              <option key={voice.voiceURI} value={voice.voiceURI}>
+                {speech.voiceOptionLabel(voice)}
+              </option>
+            ))}
+          </select>
+          <button
+            className="voice-test-button"
+            type="button"
+            onClick={() => speech.speak("Olá. Vamos treinar judo com Ô soto gari.", { id: "voice-test" })}
+            disabled={!speech.enabled}
+            aria-label="Testar voz"
+            title={speech.enabled ? "Testar voz" : "Leitura desligada"}
+          >
+            <Volume2 size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
